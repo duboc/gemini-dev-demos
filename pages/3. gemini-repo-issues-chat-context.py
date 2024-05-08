@@ -101,7 +101,7 @@ def get_code_prompt(question, code_index, code_text):
     return prompt
 
 
-st.title('Gemini Repo Inspection')
+st.title('Gemini Repo Chat with large Context')
 
 repo_dir = "./repo"
 
