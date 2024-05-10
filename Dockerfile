@@ -10,10 +10,10 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables (replace with your values)
-ENV GCP_PROJECT=conventodapenha
+ENV GCP_PROJECT=my-demo-project-400313
 ENV GCP_REGION=us-central1
 ENV STREAMLIT_SERVER_ENABLE_STATIC_SERVING=true
 EXPOSE 8080
 
 # Run Streamlit app
-CMD ["streamlit", "run", "gemini-repo.py", "--server.port=8080"]
+CMD ["streamlit", "run", "home.py", "--server.port=8080"]

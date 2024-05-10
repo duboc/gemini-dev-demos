@@ -8,8 +8,6 @@ model = model_experimental
 if reset := st.button("Reset Demo State"):
     reset_st_state()
 
-story = ""
-tasks = ""
 
 st.write("Using Gemini Pro Experimental ")
 st.subheader("Generate a User Story")
@@ -69,7 +67,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
 if generate_t2t and prompt:
-    # st.write(prompt)    with st.spinner("Generating your story using Gemini 1.0 Pro ..."):
+    # st.write(prompt)    with st.spinner("Generating your story using Gemini ..."):
         first_tab1, first_tab2= st.tabs(["Story", "Prompt"])
         with first_tab1:
             responseStory = sendPrompt(prompt, model)
@@ -103,13 +101,13 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """A partir da lista de tasks, crie snippets de python para implementar a funcionalidade de cada task.
+promptSnippets = """A partir da lista de tasks, crie snippets de python para implementar a funcionalidade para a primeira task da lista.
 Identifique restrições ou requisitos específicos que impactam a implementação:
 Limitações de tempo ou recursos
 Compatibilidade com APIs ou bibliotecas externas
 Padrões de codificação ou estilo a serem seguidos
 Documente claramente quaisquer suposições ou premissas feitas.
-COm as seguintes diretivas:
+Com as seguintes diretivas:
 - Google Style Guide para formatação
 - Utilize ferramentas e frameworks já existentes
 - Garantir a reprodutibilidade do código em diferentes ambientes
@@ -123,7 +121,7 @@ Teste e Validação:
 - Validação da correção dos resultados
 - Assegure a confiabilidade e robustez do código gerado.
 
-Crie uma ordem numerada usando o nome da tasks como indice, o segundo é um sumário do código e depois coloque o snippet gerado e quantas novos itens precisar para complementar com a informação requerida. 
+Crie o código somente para a primeira task. Faça uma ordem numerada onde o primeiro numero é o nome da task, o segundo é um sumário do código e depois coloque o snippet gerado e quantas novos itens precisar para complementar com a informação requerida. 
 """ + st.session_state["response"]
 
 st.divider()

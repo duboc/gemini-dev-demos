@@ -23,14 +23,14 @@ steps:
   
 # Store images in Google Artifact Registry 
 images:
-  - us-central1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/gemini-repo-inspection:${SHORT_SHA}
+  - us-central1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/gemini-re-demos:${SHORT_SHA}
 
 substitutions:
-  _ARTIFACT_REGISTRY_REPO: gemini-repo-inspection
+  _ARTIFACT_REGISTRY_REPO: gemini-re-demos
   _REPO_LOCATION: us-central1
-  _SERVICE_NAME: gemini-repo-inspection
+  _SERVICE_NAME: genai-re-demos
   _SERVICE_REGION: us-central1
 
-# gcloud artifacts repositories create gemini-repo-inspection --repository-format=docker --location=us-central1 --description="Gemini Repo Inspection"
+# gcloud artifacts repositories create gemini-re-demos --repository-format=docker --location=us-central1 --description="Gemini Dev Demos"
 # gcloud builds submit . --config=./cloudbuild.yaml --substitutions SHORT_SHA=1.0
 
