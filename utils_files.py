@@ -542,6 +542,3 @@ def main(repo_url):
 
 if __name__ == "__main__":
     main(sys.argv[1])
-
-
-## https://github.com/jimmc414/1filellm MIT License
