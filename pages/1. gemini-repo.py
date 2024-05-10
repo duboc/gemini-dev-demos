@@ -26,13 +26,7 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 MODEL_ID = "gemini-experimental" 
 
-model = GenerativeModel(
-    MODEL_ID,
-    #system_instruction=[
-    #    "You are a coding expert.",
-    #    "Your mission is to answer all code related questions with given context and instructions.",
-    #],
-)
+
 
 safety_settings = {
     generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_NONE,
@@ -41,7 +35,14 @@ safety_settings = {
     generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_NONE,
 }
 
-
+model = GenerativeModel(
+    MODEL_ID,
+    safety_settings=safety_settings
+    #system_instruction=[
+    #    "You are a coding expert.",
+    #    "Your mission is to answer all code related questions with given context and instructions.",
+    #],
+)
 def sendPrompt(input):
     token_size = model.count_tokens(input)
     st.write(f"Input Token size: {token_size}")
