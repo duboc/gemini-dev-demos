@@ -1,19 +1,13 @@
 import streamlit as st
-import random
-import time
 import re
 import vertexai
 import os
-import shutil
 from pathlib import Path
 from utils_streamlit import reset_st_state
 import git
 import magika
-
-
 from vertexai.generative_models import GenerativeModel, Part, FinishReason
 import vertexai.preview.generative_models as generative_models
-
 
 PROJECT_ID = os.environ.get('GCP_PROJECT', '-')
 LOCATION = os.environ.get('GCP_REGION', '-')
@@ -59,7 +53,7 @@ def sendPrompt(input):
 
     billable_characters = int(matchChar.group(1))
     valor = (billable_characters / 1000) * 0.0025
-    st.write(f"Valor da chamada: US$ {round(valor,2)}")
+    st.write(f"Valor da chamada: US$ {round(valor,5)}")
 
     prompt_response = model.generate_content(input,
         generation_config={
@@ -74,9 +68,11 @@ def sendPrompt(input):
 
 def get_code_prompt(question):
     prompt = f"""
-    Request: {question}
+    You are an expert user story creator that use all the best practices for development User Stories creation. Given the following request, give me a User Story respecting the following format:
 
-    User Story Format example:
+    Request: {question}
+    
+    User Story Format:
         As a: [User Role or Persona]
         I want to: [Action or Goal]
         So that: [Benefit or Value]
@@ -88,21 +84,24 @@ def get_code_prompt(question):
 
 
 st.title('Gemini User Story Generator')
+    
+# Create selectbox
+options = ["Crie uma historia para login no ecomerce"] + ["Crie uma historia para cadastro de produtos no ecomerce"] + ["Outro... (escrever)"]
+selection = st.selectbox("Selecione um prompt:", options=options)
 
-question = st.selectbox('Selecione um prompt:', [
-            'Crie uma historia para login no ecomerce',
-            'Provide a README explaining what this application do and how to properly use it',
-            'Provide a getting started guide to onboard new developers to the codebase.',
-            'Find the top 3 most severe issues in the codebase.',
-            'Find the most severe bug in the codebase that you can provide a code fix for.',
-            'Provide a troubleshooting guide to help resolve common issues.' 
-            ])
+# Create text input for user entry
+if selection == "Outro... (escrever)": 
+    otherOption = st.text_input("Breve descrição da User Story:")
 
-repo_url = st.text_input("Breve descrição da User Story:", """...""")
-        
+# Just to show the selected option
+if selection != "Outro... (escrever)":
+    question = selection
+else: 
+    question = otherOption
+
 if st.button('Generate'):
     with st.spinner("Processando resposta"):
         pergunta = get_code_prompt(question)
         resposta = sendPrompt(pergunta)
         st.write(resposta.text)
-        st.write(resposta.to_dict().get("usage_metadata"))
+        # st.write(resposta.to_dict().get("usage_metadata"))
