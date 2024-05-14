@@ -8,6 +8,7 @@ from langchain_google_vertexai import VertexAIEmbeddings, VertexAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
+from utils_gcp import access_secret_version
 
 
 if reset := st.button("Reset Demo State"):
@@ -16,7 +17,8 @@ if reset := st.button("Reset Demo State"):
 embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@latest")
 llm = VertexAI(model_name="gemini-experimental")
 
-ACCESS_TOKEN = os.environ.get('GITHUB_TOKEN', '-')
+gtoken = access_secret_version("GITHUB_TOKEN")
+ACCESS_TOKEN = os.environ.get(f'GITHUB_TOKEN', '{gtoken}')
 
 
 st.title("Github Issues Chat with RAG")
