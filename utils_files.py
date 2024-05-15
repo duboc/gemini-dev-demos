@@ -30,8 +30,7 @@ nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
 gtoken = access_secret_version("GITHUB_TOKEN")
-
-TOKEN = os.getenv(f'GITHUB_TOKEN', '{gtoken}')
+TOKEN = os.getenv(f'GITHUB_TOKEN', gtoken)
 if TOKEN == 'default_token_here':
     raise EnvironmentError("GITHUB_TOKEN environment variable not set.")
 

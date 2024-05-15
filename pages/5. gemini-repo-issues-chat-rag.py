@@ -18,8 +18,7 @@ embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@lat
 llm = VertexAI(model_name="gemini-experimental")
 
 gtoken = access_secret_version("GITHUB_TOKEN")
-ACCESS_TOKEN = os.environ.get(f'GITHUB_TOKEN', '{gtoken}')
-
+ACCESS_TOKEN = os.environ.get(f'GITHUB_TOKEN', gtoken)
 
 st.title("Github Issues Chat with RAG")
 st.subheader("Github Setup")

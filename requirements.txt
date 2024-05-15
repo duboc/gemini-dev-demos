@@ -16,3 +16,5 @@ tqdm==4.66.2
 vertexai==1.49.0
 wget==3.2
 youtube_transcript_api==0.6.2
+google-cloud-secret-manager
+faiss-cpu

@@ -18,9 +18,6 @@ if reset := st.button("Reset Demo State"):
 embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@latest")
 llm = VertexAI(model_name="gemini-experimental")
 
-token = access_secret_version("GITHUB_TOKEN")
-ACCESS_TOKEN = os.environ.get('GITHUB_TOKEN', token)
-
 st.title("Code Chat with RAG")
 
 repo_url = st.text_input("Cole um repositório para ser analisado:", """https://github.com/GoogleCloudPlatform/microservices-demo""")
