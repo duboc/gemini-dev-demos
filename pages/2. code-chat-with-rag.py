@@ -10,14 +10,13 @@ from langchain_google_vertexai import VertexAIEmbeddings, VertexAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
+from utils_gcp import access_secret_version
 
 if reset := st.button("Reset Demo State"):
     reset_st_state()
 
 embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@latest")
 llm = VertexAI(model_name="gemini-experimental")
-
-ACCESS_TOKEN = os.environ.get('GITHUB_TOKEN', '-')
 
 st.title("Code Chat with RAG")
 

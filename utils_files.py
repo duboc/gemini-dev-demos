@@ -16,6 +16,7 @@ import wget
 from tqdm import tqdm
 from time import sleep
 import sys 
+from utils_gcp import access_secret_version
 
 def safe_file_read(filepath, fallback_encoding='latin1'):
     try:
@@ -28,7 +29,8 @@ def safe_file_read(filepath, fallback_encoding='latin1'):
 nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
-TOKEN = os.getenv('GITHUB_TOKEN', 'default_token_here')
+gtoken = access_secret_version("GITHUB_TOKEN")
+TOKEN = os.getenv(f'GITHUB_TOKEN', gtoken)
 if TOKEN == 'default_token_here':
     raise EnvironmentError("GITHUB_TOKEN environment variable not set.")
 

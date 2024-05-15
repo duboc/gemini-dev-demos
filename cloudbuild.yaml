@@ -20,10 +20,6 @@ steps:
            '--region', '${_SERVICE_REGION}', '--platform', 'managed', 
            '--update-env-vars=GCP_PROJECT=${PROJECT_ID},GCP_REGION=${_SERVICE_REGION}', 
            '--allow-unauthenticated']
-  
-# Store images in Google Artifact Registry 
-images:
-  - us-central1-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/gemini-re-demos:${SHORT_SHA}
 
 substitutions:
   _ARTIFACT_REGISTRY_REPO: gemini-re-demos

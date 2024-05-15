@@ -3,21 +3,43 @@ from utils_streamlit import reset_st_state
 import streamlit as st
 
 
-model = model_experimental
+def load_models(model_name):
+    if model_name == "gemini-experimental":
+        model = model_experimental
+    elif model_name == "gemini-1.5-pro-preview-0514":
+        model = model_gemini_pro_15
+    else:
+        model = model_gemini_flash
+    return model 
+
 
 if reset := st.button("Reset Demo State"):
     reset_st_state()
 
+if 'response' not in st.session_state:
+    st.session_state['response'] = 'init'
 
 st.write("Using Gemini Pro Experimental ")
 st.subheader("Generate a User Story")
 # Story premise
+model_name = st.radio(
+      label="Model:",
+      options=["gemini-experimental", "gemini-1.5-pro-preview-0514", "gemini-1.5-flash-preview-0514"],
+      captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
+      key="model_name",
+      index=0,
+      horizontal=True)
+
+model = load_models(model_name)
+
+
 persona_name = st.text_input(
     "Persona: \n\n", key="persona_name", value="Joao"
 )
 persona_type = st.text_input(
     "Tipo de persona? \n\n", key="persona_type", value="Customer"
 )
+
 
 
 user_story = st.selectbox ('Selecione um tema:', [
@@ -67,7 +89,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
 if generate_t2t and prompt:
-    # st.write(prompt)    with st.spinner("Generating your story using Gemini ..."):
+    with st.spinner("Generating your story using Gemini ..."):
         first_tab1, first_tab2= st.tabs(["Story", "Prompt"])
         with first_tab1:
             responseStory = sendPrompt(prompt, model)
@@ -77,6 +99,7 @@ if generate_t2t and prompt:
                 st.session_state["response"] = responseStory
         with first_tab2:
             st.text(prompt)
+        
 
 
 promptTasks = """
@@ -90,7 +113,7 @@ Crie uma tabela com as tasks como índice da tabela com a descrição da task.
 st.divider()
 generate_Tasks = st.button("Gerar a lista de tasks a partir user story", key="generate_Tasks")
 if generate_Tasks and promptTasks:
-    with st.spinner("Generating your story using Gemini 1.0 Pro ..."):
+    with st.spinner("Generating your story using Gemini Pro ..."):
         first_tab1, first_tab2= st.tabs(["Tasks", "Prompt"])
         with first_tab1:
             responseTasks = sendPrompt(promptTasks, model)
