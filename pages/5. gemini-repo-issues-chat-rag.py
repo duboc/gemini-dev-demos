@@ -20,8 +20,18 @@ llm = VertexAI(model_name="gemini-experimental")
 gtoken = access_secret_version("GITHUB_TOKEN")
 ACCESS_TOKEN = os.environ.get(f'GITHUB_TOKEN', gtoken)
 
-st.title("Github Issues Chat with RAG")
-st.subheader("Github Setup")
+
+st.header("Github Issues Chat with RAG", divider="rainbow")
+st.markdown("""
+
+How It Works
+
+- Data Gathering: The app securely connects to a specified GitHub repository and fetches all the issues.
+- Intelligent Indexing: The app doesn't just store issues; it understands them. It uses advanced language models to break down and analyze the content of each issue, making it easier to find relevant information later.
+- Natural Language Chat: Simply type your question in plain English (or any supported language), and the chatbot will instantly provide a concise, focused answer, pinpointing the exact issue where the information is found.
+
+""")
+st.subheader("Github Setup", divider="blue")
 repo = st.text_input("Digite um repositório do gitub no formato repo/name. Repo: ", "GoogleCloudPlatform/microservices-demo")
 
 
@@ -68,7 +78,7 @@ if st.button("Iniciar bot"):
 
 
 
-st.divider()
+st.subheader("Start conversation", divider="green")
 st.subheader("Chat")
 
 

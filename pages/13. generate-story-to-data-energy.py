@@ -34,7 +34,7 @@ model = load_models(model_name)
 
 
 persona_name = st.text_input(
-    "Persona: \n\n", key="persona_name", value="Joao"
+    "Persona: \n\n", key="persona_name", value="Breno Cabral"
 )
 persona_type = st.text_input(
     "Tipo de persona? \n\n", key="persona_type", value="Customer"
@@ -43,12 +43,14 @@ persona_type = st.text_input(
 
 
 user_story = st.selectbox ('Selecione um tema:', [
-            'Como cliente curioso, quero ver teasers sobre o próximo lançamento do produto para despertar meu interesse.',
-            'Como cliente fidelizado, quero ser recompensado com acesso antecipado ou ofertas exclusivas para o novo produto.',
-            'Como cliente experiente em tecnologia, quero aprender sobre os recursos e benefícios do novo produto por meio de páginas de produto detalhadas ou vídeos.',
-            'Como cliente recorrente, quero poder encontrar e adicionar rapidamente o novo produto ao meu carrinho.',
-            'Como cliente preocupado com o preço, quero ver informações claras sobre preços, descontos e quaisquer pacotes disponíveis para o novo produto.',
-            'Como cliente satisfeito, quero deixar uma avaliação e compartilhar minha experiência com o novo produto.' 
+			'[Consumo] Como cliente, quero visualizar meu histórico de consumo de energia para entender meus padrões de uso.',
+			'[Alertas] Como cliente, quero receber alertas sobre interrupções de energia programadas para me planejar.',
+			'[Adesão] Como cliente, quero solicitar um novo ponto de fornecimento de energia de forma rápida e fácil.',
+			'[Portal] Como cliente, quero acessar um portal online para gerenciar minha conta de energia e realizar pagamentos.',
+            '[Atendimento] Como cliente, quero entrar em contato com um representante de atendimento para tirar dúvidas e resolver problemas.',
+            '[Transparência] Como cliente, quero receber informações claras e transparentes sobre tarifas, prazos e condições do serviço.',
+            '[Ouvidoria] Como cliente, quero ter acesso a um canal de comunicação para registrar reclamações e sugestões.'
+
             ], 
             key="user_story", 
 
@@ -124,38 +126,77 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """A partir da lista de tasks, crie snippets de python para implementar a funcionalidade para a primeira task da lista.
-Identifique restrições ou requisitos específicos que impactam a implementação:
-Limitações de tempo ou recursos
-Compatibilidade com APIs ou bibliotecas externas
-Padrões de codificação ou estilo a serem seguidos
-Documente claramente quaisquer suposições ou premissas feitas.
-Com as seguintes diretivas:
-- Google Style Guide para formatação
-- Utilize ferramentas e frameworks já existentes
-- Garantir a reprodutibilidade do código em diferentes ambientes
-- Código formatado com indentação e espaçamento adequados
-- Comentários explicativos para cada seção do código
-- Documentação com exemplos de uso e informações adicionais
-Teste e Validação:
-- Inclua testes automatizados para validar o funcionamento dos snippets:
-- Casos de teste que garantem a cobertura das funcionalidades
-- Verificação de erros e exceções
-- Validação da correção dos resultados
-- Assegure a confiabilidade e robustez do código gerado.
+promptSnippets = """Análise da User Story:
 
-Crie o código somente para a primeira task. Faça uma ordem numerada onde o primeiro numero é o nome da task, o segundo é um sumário do código e depois coloque o snippet gerado e quantas novos itens precisar para complementar com a informação requerida. 
+Leia atentamente a descrição da user story de varejo fornecida.
+Identifique as tasks (ou atividades) que compõem a user story.
+Extraia os principais substantivos e verbos das tasks, pois eles podem indicar dimensões e fatos relevantes para a tabela DW.
+
+Exemplo:
+User Story: "Como cliente residencial, quero poder acompanhar meu consumo de energia elétrica ao longo do tempo, visualizar o histórico de leituras do medidor e identificar os períodos de maior consumo."
+
+Tasks:
+- Acessar o portal do cliente da companhia de energia.
+- Visualizar gráficos de consumo de energia por período.
+- Comparar o consumo atual com o mesmo período do ano anterior.
+
+Gere uma sugestão de tabela DW para armazenar os dados necessários para atender a essa user story.
+Fim exemplo:
+
+Modelagem Dimensional:
+
+Crie uma lista de dimensões candidatas com base nos substantivos identificados. Exemplos de dimensões comuns em energia e transmissão para residências:
+Cliente (Residência)
+Medidor de Energia
+Tempo (Data, Hora, Dia da Semana, Mês, Ano)
+Tarifa de Energia
+Localização (Bairro, Cidade, Estado)
+Tipo de Residência (Casa, Apartamento)
+Equipamento (Eletrodoméstico, Eletrônico)
+[Coloque sempre em formato de tabela]
+
+Avalie a granularidade desejada para cada dimensão. Por exemplo, a dimensão tempo pode ser diária, semanal ou mensal.
+
+Modelagem de Fatos:
+
+Identifique os fatos (eventos mensuráveis) a partir dos verbos das tasks. Exemplos de fatos em energia e transmissão para residências:
+Consumo de Energia
+Leitura do Medidor
+Pagamento da Conta
+Interrupção no Fornecimento
+[Coloque sempre em formato de tabela]
+Determine as métricas (valores numéricos) associadas a cada fato. Exemplos de métricas:
+kWh Consumidos
+Valor da Conta
+Tensão da Rede
+Duração da Interrupção
+[Coloque sempre em formato de tabela]
+
+Estrutura da Tabela DW:
+
+Crie uma tabela com as seguintes colunas:
+Chave Primária: Identificador único da linha (geralmente um número sequencial).
+Chaves Estrangeiras: Colunas que se referem às chaves primárias das dimensões.
+Métricas: Colunas que armazenam os valores numéricos dos fatos.
+Defina os tipos de dados adequados para cada coluna.
+[Coloque sempre em formato de tabela]
+
+Sempre ao gerar dados mock, utilize algum nome da seguinte lista:
+Breno, Amadei, Carlos, Mazurque, Kauy, Filipe, Renato, Wilgner, Rober, Diego, Iago, Tiago, Brunno
+
+Inclua exemplos de dados que poderiam ser inseridos na tabela DW, com base nas tasks da user story.  Utilize o dados abaixo como entrada.
+ 
 """ + st.session_state["response"]
 
 st.divider()
-generate_python = st.button("Criar snippets das tasks", key="generate_python")
+generate_python = st.button("Criar dw das tasks", key="generate_python")
 if generate_python and promptSnippets:
-    with st.spinner("Generating your tasks code using Gemini..."):
+    with st.spinner("Generating your tasks dw using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
             responseSnippets = sendPrompt(promptSnippets, model)
             if responseSnippets:
-                st.write("Your code snippets:")
+                st.write("Your dw snippets:")
                 st.markdown(responseSnippets)
                 st.session_state["snippets"] = responseSnippets
         with first_tab2:
