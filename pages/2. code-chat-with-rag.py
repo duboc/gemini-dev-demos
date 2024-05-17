@@ -18,8 +18,14 @@ if reset := st.button("Reset Demo State"):
 embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@latest")
 llm = VertexAI(model_name="gemini-experimental")
 
-st.title("Code Chat with RAG")
+st.header("Code Chat with RAG", divider="rainbow")
 
+st.info(
+        "💡 **Observação:** Se o repositório for grande, a indexação pode levar um tempo. \n"
+        "Isso é normal, pois estamos analisando e organizando todo o código para facilitar a busca e resposta às suas perguntas. 😊"
+    )
+
+st.subheader("Preparar dados", divider="blue")
 repo_url = st.text_input("Cole um repositório para ser analisado:", """https://github.com/GoogleCloudPlatform/microservices-demo""")
 
 repo_dir = "./repo"
@@ -44,7 +50,7 @@ def get_chain(input):
 
     return chain
 
-st.divider()
+st.subheader("Start conversation", divider="green")
 
 
 if st.button("Iniciar bot"):

@@ -157,7 +157,7 @@ if generate_test_case:
             st.write(promptTest)
 
 st.subheader("Gerar script de execução do test plan", divider="red")
-generate_test_case_code = st.button("Genare Script Plan", key="generate_test_case_code")
+generate_test_case_code = st.button("Generate Script Plan", key="generate_test_case_code")
 if generate_test_case_code:
     with st.spinner("Generating your test cases code using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])

@@ -91,10 +91,21 @@ def get_code_prompt(question, code_index, code_text):
     return prompt
 
 
-st.title('Gemini Repo Inspection')
+st.header("Gemini Repo Inspection", divider="rainbow")
+
+st.markdown(
+    """
+    **Important Note:**
+
+    This demo uses the Gemini Experimental model, which is designed for handling large amounts of context. However, it is limited to 1 million tokens by default. 
+
+    :warning: Due to the payload size and the high context nature of the API calls, responses may take some time to generate.
+    """
+)
 
 repo_dir = "./repo"
 
+st.subheader("Preparar dados", divider="blue")
 def clone_repo(repo_url, repo_dir):
     """Clone a GitHub repository."""
 
@@ -145,7 +156,7 @@ if st.button("Clonar e Index repo"):
 
  
 
-
+st.subheader("Avaliar repo", divider="green")
 question = st.selectbox('Selecione um prompt:', [
             'Give me a summary of this codebase, and tell me the top 3 things that I can learn from it.',
             'Provide a README explaining what this application do and how to properly use it',

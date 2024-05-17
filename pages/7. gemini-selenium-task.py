@@ -83,8 +83,21 @@ def get_gemini_pro_vision_response(
     return "".join(final_response)
 
 
-st.header("Vertex AI Gemini with Selenium", divider="rainbow")
+st.header("Generate User Test with Selenium", divider="rainbow")
 
+st.markdown("""
+This demonstration showcases the capabilities of our Gemini Models. 
+            
+In this example, you'll witness how it can:
+
+- Analyze Videos: Understand the actions taking place in a video.
+- Generate Descriptions: Create detailed text descriptions of video content.
+- Craft Code: Automatically generate code based on a video and description.
+            
+This demo focuses on creating a Selenium script, a powerful tool for automating web browser interactions.
+
+Feel free to explore and see how this technology can assist you in your coding endeavors! :rocket:
+""")
 
 model_name = st.radio(
       label="Model:",
