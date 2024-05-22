@@ -68,7 +68,7 @@ def sendPrompt(input, model):
 
     prompt_response = model.generate_content(input,
         generation_config={
-            "max_output_tokens": 4096,
+            "max_output_tokens": 8192,
             "temperature": 0.4,
             "top_p": 1
         },

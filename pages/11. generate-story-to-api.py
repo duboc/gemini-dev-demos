@@ -37,17 +37,26 @@ persona_name = st.text_input(
     "Persona: \n\n", key="persona_name", value="Breno Cabral"
 )
 persona_type = st.text_input(
-    "Tipo de persona? \n\n", key="persona_type", value="Paciente"
+    "Tipo de persona? \n\n", key="persona_type", value="Customer"
 )
 
 
 
 user_story = st.selectbox ('Selecione um tema:', [
-            'Prontuário: Como profissional de saúde, quero acessar o prontuário eletrônico do paciente de forma rápida para agilizar o atendimento.',
-            'Prescrição: Como médico, quero prescrever medicamentos eletronicamente para facilitar a vida do paciente.',
-            'Telemedicina: Como médico, quero realizar consultas online para atender pacientes remotamente.',
-            'Integração: Como gestor de saúde, quero integrar sistemas de informação para otimizar processos.',
-            'Dados: Como pesquisador, quero acessar dados de saúde anonimizados para estudos epidemiológicos.' 
+			'Descoberta: Como cliente, quero encontrar facilmente produtos relevantes para minhas necessidades, tanto online quanto na loja física.',
+			'Pesquisa e Comparação: Como cliente, quero comparar preços, características e avaliações de produtos similares para tomar a melhor decisão de compra.',
+			'Compra (Online): Como cliente, quero um processo de compra online intuitivo, seguro e com diversas opções de pagamento e entrega.',
+			'Compra (Loja Física): Como cliente, quero encontrar facilmente os produtos na loja, receber auxílio de vendedores atenciosos e ter um checkout rápido e eficiente.',
+			'Pós-Compra (Online): Como cliente, quero acompanhar o status do meu pedido, receber notificações sobre a entrega e ter opções fáceis de troca ou devolução.',
+			'Pós-Compra (Loja Física): Como cliente, quero trocar ou devolver produtos sem complicações e receber suporte para dúvidas ou problemas.',
+			'Fidelização: Como cliente, quero ser reconhecido e recompensado por minhas compras, receber ofertas personalizadas e participar de programas de fidelidade.',
+			'Loja Física: Como cliente, quero receber atendimento atencioso e personalizado de vendedores que conheçam bem os produtos e possam me ajudar a encontrar o que preciso.',
+			'Online (Chat/E-mail): Como cliente, quero ter acesso a canais de atendimento online eficientes, com respostas rápidas e soluções eficazes para minhas dúvidas ou problemas.',
+			'Central de Atendimento: Como cliente, quero falar com atendentes capacitados e resolver meus problemas de forma rápida e satisfatória.',
+			'Canais de Autoatendimento: Como cliente, quero encontrar informações e soluções para problemas comuns através de FAQs, tutoriais em vídeo e chatbots.',
+			'Personalização: Como cliente, quero receber recomendações de produtos, ofertas e conteúdo relevantes para meus interesses e histórico de compras.',
+			'Omnichannel: Como cliente, quero uma experiência de compra integrada, com acesso aos mesmos produtos, informações e serviços em todos os canais de venda (online e offline).',
+			'Sustentabilidade: Como cliente, quero ter acesso a informações sobre a origem e impacto ambiental dos produtos, além de opções de compra e descarte mais sustentáveis.'
             ], 
             key="user_story", 
 
@@ -189,14 +198,14 @@ Utilize o dados abaixo como entrada.
 """ + st.session_state["response"]
 
 st.divider()
-generate_python = st.button("Criar dw das tasks", key="generate_python")
+generate_python = st.button("Criar modelagem", key="generate_python")
 if generate_python and promptSnippets:
-    with st.spinner("Generating your tasks dw using Gemini..."):
+    with st.spinner("Generating your data model..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
             responseSnippets = sendPrompt(promptSnippets, model)
             if responseSnippets:
-                st.write("Your dw snippets:")
+                st.write("Your response:")
                 st.markdown(responseSnippets)
                 st.session_state["response"] = responseSnippets
         with first_tab2:
@@ -204,93 +213,83 @@ if generate_python and promptSnippets:
 
 promptBigQuery = """
 
-## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Saúde)
+Instruções para o Modelo:
 
-**Instruções para o Modelo:**
+Recebimento da Sugestão de Tabela DW (Varejo):
 
-1. **Recebimento da Sugestão:**
-   - Receba a sugestão de tabela DW gerada anteriormente para o contexto de saúde, incluindo:
-      - Nome da tabela
-      - Dimensões (com seus atributos e tipos de dados)
-      - Fatos (com suas métricas e tipos de dados)
-      - Exemplos de dados (opcional)
+Utilize a sugestão da tabela DW gerada anteriormente para o contexto de varejo, incluindo:
+Nome da tabela (ex: Fato_Vendas)
+Dimensões (com seus atributos e tipos de dados)
+Fatos (com suas métricas e tipos de dados)
+Geração da Especificação OpenAPI (YAML):
 
-2. **Criação do Dataset no BigQuery:**
-   - Utilize o comando `gcloud` para criar um novo dataset no BigQuery, caso ainda não exista:
-     ```bash
-     gcloud bigquery datasets create [NOME_DO_DATASET] --location=[LOCALIZAÇÃO]
-     ```
-     - Substitua `[NOME_DO_DATASET]` por um nome relevante para o contexto de saúde (ex: `dados_saude`).
-     - Substitua `[LOCALIZAÇÃO]` pela localização geográfica do dataset (ex: `southamerica-east1`).
+Gere uma especificação OpenAPI (Swagger) versão 3.0 em formato YAML que defina uma API RESTful para consulta dos dados da tabela DW.
+Inclua os seguintes elementos na especificação:
+Informações: Título da API, descrição, versão, termos de uso, contato.
+Servidores: URL base da API no Apigee X.
+Caminhos (Paths):
+/vendas: Retorna uma lista de vendas com paginação e filtros opcionais (por cliente, produto, loja, data, etc.).
+/vendas/{id}: Retorna detalhes de uma venda específica pelo ID.
+/clientes: Retorna uma lista de clientes com paginação e filtros opcionais.
+/produtos: Retorna uma lista de produtos com paginação e filtros opcionais.
+/lojas: Retorna uma lista de lojas com paginação e filtros opcionais.
+/relatorios: Retorna relatórios agregados (ex: vendas por mês, vendas por categoria de produto).
+Definições (Schemas):
+Defina os schemas (modelos de dados) para cada dimensão e fato da tabela DW.
+Inclua exemplos de dados para cada schema.
+Segurança: Defina o esquema de autenticação da API (ex: OAuth2, API Key).
+Criação do Proxy no Apigee X:
 
-3. **Criação das Tabelas de Dimensão:**
-   - Para cada dimensão na sugestão, gere um comando SQL `CREATE TABLE` para criar a tabela correspondente no BigQuery:
-     ```sql
-     CREATE TABLE [NOME_DO_DATASET].[NOME_DA_DIMENSÃO] (
-         [ID_DIMENSÃO] [TIPO_DE_DADO] PRIMARY KEY,
-         [ATRIBUTO1] [TIPO_DE_DADO],
-         [ATRIBUTO2] [TIPO_DE_DADO],
-         ...
-     );
-     ```
-     - Substitua `[NOME_DO_DATASET]` pelo nome do dataset criado.
-     - Substitua `[NOME_DA_DIMENSÃO]` pelo nome da dimensão (ex: `Paciente`, `Profissional_Saude`, `Procedimento_Medico`).
-     - Substitua `[ID_DIMENSÃO]` pelo nome do atributo chave primária da dimensão (ex: `ID_Paciente`, `ID_Profissional`, `ID_Procedimento`).
-     - Substitua `[TIPO_DE_DADO]` pelo tipo de dado apropriado para cada atributo (ex: `INTEGER`, `STRING`, `DATE`, `FLOAT`).
+Instruções para Criação do Proxy no Apigee X:
 
-4. **Criação da Tabela de Fato:**
-   - Gere um comando SQL `CREATE TABLE` para criar a tabela de fato no BigQuery:
-     ```sql
-     CREATE TABLE [NOME_DO_DATASET].[NOME_DA_TABELA_FATO] (
-         [ID_FATO] [TIPO_DE_DADO] PRIMARY KEY,
-         [FK_DIMENSÃO1] [TIPO_DE_DADO] REFERENCES [NOME_DO_DATASET].[NOME_DA_DIMENSÃO1]([ID_DIMENSÃO1]),
-         [FK_DIMENSÃO2] [TIPO_DE_DADO] REFERENCES [NOME_DO_DATASET].[NOME_DA_DIMENSÃO2]([ID_DIMENSÃO2]),
-         ...
-         [METRICA1] [TIPO_DE_DADO],
-         [METRICA2] [TIPO_DE_DADO],
-         ...
-     );
-     ```
-     - Substitua `[NOME_DA_TABELA_FATO]` pelo nome da tabela de fato (ex: `Fato_Consulta`).
-     - Substitua `[FK_DIMENSÃO]` pelos nomes das chaves estrangeiras que se referem às dimensões (ex: `FK_Paciente`, `FK_Profissional`).
-     - Substitua `[METRICA]` pelos nomes das métricas (ex: `Duracao_Consulta`, `Custo_Procedimento`).
+Exporte a Especificação OpenAPI:
 
-5. **Inserção de Dados (Opcional):**
-   - Se a sugestão incluir exemplos de dados, gere comandos SQL `INSERT INTO` para inserir esses dados nas tabelas criadas.
+Salve a especificação OpenAPI gerada em um arquivo openapi.yaml.
+Crie um novo proxy usando a apigeecli:
 
-**Exemplo de Prompt (Saúde):**
+Utilize o seguinte comando apigeecli para criar o proxy:
+Bash
+apigeecli apis create -n [NOME_DO_PROXY] -f openapi.yaml
+Use code with caution.
+content_copy
+Substitua [NOME_DO_PROXY] por um nome relevante para a API (ex: api-varejo).
+Observações:
 
-```
+Certifique-se de ter a apigeecli instalada e configurada corretamente para se conectar à sua organização no Apigee X.
+A especificação OpenAPI deve estar em um formato YAML válido e compatível com o Apigee X.
+Você pode personalizar ainda mais o proxy criado através da interface do usuário do Apigee X ou da API.
+Exemplo de Prompt (Varejo):
+
 Sugestão de Tabela DW:
 
-Nome da Tabela: Fato_Consulta
+Nome da Tabela: Fato_Vendas
 
 Dimensões:
-- Paciente (ID_Paciente INTEGER, Nome STRING, Data_Nascimento DATE)
-- Profissional_Saude (ID_Profissional INTEGER, Nome STRING, Especialidade STRING)
-- Procedimento_Medico (ID_Procedimento INTEGER, Descricao STRING)
+- Cliente (ID_Cliente INTEGER, Nome STRING, Sexo STRING, Faixa_Etaria STRING)
+- Produto (ID_Produto INTEGER, Nome STRING, Categoria STRING, Subcategoria STRING)
+- Loja (ID_Loja INTEGER, Nome STRING, Cidade STRING, Estado STRING)
+- Tempo (ID_Tempo DATE, Ano INTEGER, Trimestre INTEGER, Mês INTEGER, Dia INTEGER)
 
 Fatos:
-- Data_Consulta DATE
-- Duracao_Consulta INTEGER
-- Custo_Procedimento FLOAT
+- Data_Venda DATE
+- Quantidade_Vendida INTEGER
+- Valor_Total FLOAT
+- Forma_Pagamento STRING
 
-Crie as tabelas no BigQuery e gere os comandos SQL necessários.
-```
-
+Gere uma especificação OpenAPI 3.0 em formato YAML para uma API de consulta de dados de vendas no varejo e descreva os passos para criar um proxy no Apigee X usando a apigeecli.
 
 Dados:
 """ + st.session_state["response"]
 
 st.divider()
-generate_bigquery = st.button("Criar Implementação no BigQuery", key="generate_bigquery")
+generate_bigquery = st.button("Criar OpenAPI Specs", key="generate_bigquery")
 if generate_bigquery and promptBigQuery:
-    with st.spinner("Generating your BigQuery implementation using Gemini..."):
+    with st.spinner("Generating your Specs..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
             responseBigQuery = sendPrompt(promptBigQuery, model)
             if responseBigQuery:
-                st.write("Your bq snippets:")
+                st.write("Your response:")
                 st.markdown(responseBigQuery)
                 st.session_state["bigquery"] = responseBigQuery
         with first_tab2:

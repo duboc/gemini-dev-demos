@@ -128,48 +128,51 @@ if generate_Tasks and promptTasks:
 
 promptSnippets = """Análise da User Story:
 
-Leia atentamente a descrição da user story de varejo fornecida.
-Identifique as tasks (ou atividades) que compõem a user story.
-Extraia os principais substantivos e verbos das tasks, pois eles podem indicar dimensões e fatos relevantes para a tabela DW.
-
 Exemplo:
-User Story: "Como cliente residencial, quero poder acompanhar meu consumo de energia elétrica ao longo do tempo, visualizar o histórico de leituras do medidor e identificar os períodos de maior consumo."
+User Story: "Como médico, quero poder acompanhar o histórico de consultas dos meus pacientes, incluindo datas, diagnósticos, procedimentos realizados e medicamentos prescritos."
 
 Tasks:
-- Acessar o portal do cliente da companhia de energia.
-- Visualizar gráficos de consumo de energia por período.
-- Comparar o consumo atual com o mesmo período do ano anterior.
+- Acessar o prontuário eletrônico do paciente.
+- Visualizar lista de consultas anteriores com detalhes.
+- Adicionar novas informações sobre a consulta atual.
 
 Gere uma sugestão de tabela DW para armazenar os dados necessários para atender a essa user story.
 Fim exemplo:
 
+Leia atentamente a descrição da user story de varejo fornecida.
+Identifique as tasks (ou atividades) que compõem a user story.
+Extraia os principais substantivos e verbos das tasks, pois eles podem indicar dimensões e fatos relevantes para a tabela DW.
+
+
 Modelagem Dimensional:
 
-Crie uma lista de dimensões candidatas com base nos substantivos identificados. Exemplos de dimensões comuns em energia e transmissão para residências:
-Cliente (Residência)
-Medidor de Energia
+Crie uma lista de dimensões candidatas com base nos substantivos identificados. Exemplos de dimensões comuns em saúde:
+Paciente
+Profissional de Saúde (Médico, Enfermeiro, etc.)
+Instituição de Saúde (Hospital, Clínica, etc.)
 Tempo (Data, Hora, Dia da Semana, Mês, Ano)
-Tarifa de Energia
-Localização (Bairro, Cidade, Estado)
-Tipo de Residência (Casa, Apartamento)
-Equipamento (Eletrodoméstico, Eletrônico)
+Procedimento Médico
+Medicamento
+Diagnóstico
+Plano de Saúde
 [Coloque sempre em formato de tabela]
-
-Avalie a granularidade desejada para cada dimensão. Por exemplo, a dimensão tempo pode ser diária, semanal ou mensal.
 
 Modelagem de Fatos:
+Identifique os fatos (eventos mensuráveis) a partir dos verbos das tasks. 
+Exemplos de fatos em saúde:
+Consulta Médica
+Internação
+Exame
+Cirurgia
+Prescrição de Medicamento
 
-Identifique os fatos (eventos mensuráveis) a partir dos verbos das tasks. Exemplos de fatos em energia e transmissão para residências:
-Consumo de Energia
-Leitura do Medidor
-Pagamento da Conta
-Interrupção no Fornecimento
-[Coloque sempre em formato de tabela]
-Determine as métricas (valores numéricos) associadas a cada fato. Exemplos de métricas:
-kWh Consumidos
-Valor da Conta
-Tensão da Rede
-Duração da Interrupção
+Determine as métricas (valores numéricos) associadas a cada fato. 
+
+Exemplos de métricas:
+Duração da Consulta
+Custo do Procedimento
+Dosagem do Medicamento
+Resultados do Exame
 [Coloque sempre em formato de tabela]
 
 Estrutura da Tabela DW:
@@ -181,11 +184,11 @@ Métricas: Colunas que armazenam os valores numéricos dos fatos.
 Defina os tipos de dados adequados para cada coluna.
 [Coloque sempre em formato de tabela]
 
-Sempre ao gerar dados mock, utilize algum nome da seguinte lista:
-Breno, Amadei, Carlos, Mazurque, Kauy, Filipe, Renato, Wilgner, Rober, Diego, Iago, Tiago, Brunno
+Inclua exemplos de dados que poderiam ser inseridos na tabela DW, com base nas tasks da user story.  
 
-Inclua exemplos de dados que poderiam ser inseridos na tabela DW, com base nas tasks da user story.  Utilize o dados abaixo como entrada.
- 
+Sempre ao gerar dados mock, utilize algum nome da seguinte lista:
+Breno, Amadei, Carlos, Mazurque, Kauy, Filipe, Renato, Wilgner, Rober, Diego, Iago, Tiago, Brunno, Koba
+Utilize o dados abaixo como entrada. 
 """ + st.session_state["response"]
 
 st.divider()
@@ -198,6 +201,100 @@ if generate_python and promptSnippets:
             if responseSnippets:
                 st.write("Your dw snippets:")
                 st.markdown(responseSnippets)
-                st.session_state["snippets"] = responseSnippets
+                st.session_state["response"] = responseSnippets
         with first_tab2:
             st.text(promptSnippets)
+
+promptBigQuery = """
+
+## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Energia - Consumidor Final)
+
+**Instruções para o Modelo:**
+
+1. **Recebimento da Sugestão:**
+   - Receba a sugestão de tabela DW gerada anteriormente para o contexto de energia, com foco no consumidor final, incluindo:
+      - Nome da tabela
+      - Dimensões (com seus atributos e tipos de dados)
+      - Fatos (com suas métricas e tipos de dados)
+      - Exemplos de dados (opcional)
+
+2. **Criação do Dataset no BigQuery:**
+   - Utilize o comando `gcloud` para criar um novo dataset no BigQuery, caso ainda não exista:
+     ```bash
+     gcloud bigquery datasets create [NOME_DO_DATASET] --location=[LOCALIZAÇÃO]
+     ```
+     - Substitua `[NOME_DO_DATASET]` por um nome relevante para o contexto de energia (ex: `dados_energia_consumidor`).
+     - Substitua `[LOCALIZAÇÃO]` pela localização geográfica do dataset (ex: `southamerica-east1`).
+
+3. **Criação das Tabelas de Dimensão:**
+   - Para cada dimensão na sugestão, gere um comando SQL `CREATE TABLE` para criar a tabela correspondente no BigQuery:
+     ```sql
+     CREATE TABLE [NOME_DO_DATASET].[NOME_DA_DIMENSÃO] (
+         [ID_DIMENSÃO] [TIPO_DE_DADO] PRIMARY KEY,
+         [ATRIBUTO1] [TIPO_DE_DADO],
+         [ATRIBUTO2] [TIPO_DE_DADO],
+         ...
+     );
+     ```
+     - Substitua `[NOME_DO_DATASET]` pelo nome do dataset criado.
+     - Substitua `[NOME_DA_DIMENSÃO]` pelo nome da dimensão (ex: `Consumidor`, `Localizacao`, `Tarifa_Energia`).
+     - Substitua `[ID_DIMENSÃO]` pelo nome do atributo chave primária da dimensão (ex: `ID_Consumidor`, `ID_Localizacao`, `ID_Tarifa`).
+     - Substitua `[TIPO_DE_DADO]` pelo tipo de dado apropriado para cada atributo (ex: `INTEGER`, `STRING`, `DATE`, `FLOAT`).
+
+4. **Criação da Tabela de Fato:**
+   - Gere um comando SQL `CREATE TABLE` para criar a tabela de fato no BigQuery:
+     ```sql
+     CREATE TABLE [NOME_DO_DATASET].[NOME_DA_TABELA_FATO] (
+         [ID_FATO] [TIPO_DE_DADO] PRIMARY KEY,
+         [FK_DIMENSÃO1] [TIPO_DE_DADO] REFERENCES [NOME_DO_DATASET].[NOME_DA_DIMENSÃO1]([ID_DIMENSÃO1]),
+         [FK_DIMENSÃO2] [TIPO_DE_DADO] REFERENCES [NOME_DO_DATASET].[NOME_DA_DIMENSÃO2]([ID_DIMENSÃO2]),
+         ...
+         [METRICA1] [TIPO_DE_DADO],
+         [METRICA2] [TIPO_DE_DADO],
+         ...
+     );
+     ```
+     - Substitua `[NOME_DA_TABELA_FATO]` pelo nome da tabela de fato (ex: `Fato_Consumo_Energia`).
+     - Substitua `[FK_DIMENSÃO]` pelos nomes das chaves estrangeiras que se referem às dimensões (ex: `FK_Consumidor`, `FK_Tarifa`).
+     - Substitua `[METRICA]` pelos nomes das métricas (ex: `Consumo_kWh`, `Valor_Total`).
+
+5. **Inserção de Dados (Opcional):**
+   - Se a sugestão incluir exemplos de dados, gere comandos SQL `INSERT INTO` para inserir esses dados nas tabelas criadas.
+
+**Exemplo de Prompt (Energia - Consumidor Final):**
+
+```
+Sugestão de Tabela DW:
+
+Nome da Tabela: Fato_Consumo_Energia
+
+Dimensões:
+- Consumidor (ID_Consumidor INTEGER, Nome STRING, Tipo_Residencia STRING, Classe_Consumo STRING)
+- Localizacao (ID_Localizacao INTEGER, Cidade STRING, Estado STRING, Regiao STRING)
+- Tarifa_Energia (ID_Tarifa INTEGER, Descricao STRING, Valor_kWh FLOAT)
+
+Fatos:
+- Data_Leitura DATE
+- Consumo_kWh FLOAT
+- Valor_Total FLOAT
+- Bandeira_Tarifaria STRING
+
+Crie as tabelas no BigQuery e gere os comandos SQL necessários.
+```
+
+Dados:
+""" + st.session_state["response"]
+
+st.divider()
+generate_bigquery = st.button("Criar Implementação no BigQuery", key="generate_bigquery")
+if generate_bigquery and promptBigQuery:
+    with st.spinner("Generating your BigQuery implementation using Gemini..."):
+        first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
+        with first_tab1:
+            responseBigQuery = sendPrompt(promptBigQuery, model)
+            if responseBigQuery:
+                st.write("Your bq snippets:")
+                st.markdown(responseBigQuery)
+                st.session_state["bigquery"] = responseBigQuery
+        with first_tab2:
+            st.text(responseBigQuery)

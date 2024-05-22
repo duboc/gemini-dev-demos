@@ -37,17 +37,19 @@ persona_name = st.text_input(
     "Persona: \n\n", key="persona_name", value="Breno Cabral"
 )
 persona_type = st.text_input(
-    "Tipo de persona? \n\n", key="persona_type", value="Paciente"
+    "Tipo de persona? \n\n", key="persona_type", value="Customer"
 )
 
 
 
 user_story = st.selectbox ('Selecione um tema:', [
-            'Prontuário: Como profissional de saúde, quero acessar o prontuário eletrônico do paciente de forma rápida para agilizar o atendimento.',
-            'Prescrição: Como médico, quero prescrever medicamentos eletronicamente para facilitar a vida do paciente.',
-            'Telemedicina: Como médico, quero realizar consultas online para atender pacientes remotamente.',
-            'Integração: Como gestor de saúde, quero integrar sistemas de informação para otimizar processos.',
-            'Dados: Como pesquisador, quero acessar dados de saúde anonimizados para estudos epidemiológicos.' 
+			'Personalização de Ofertas: Como gerente de produtos, quero analisar o perfil financeiro e o comportamento do cliente (transações, investimentos, etc.), para que possa oferecer produtos e serviços personalizados e relevantes, aumentando a taxa de conversão e fidelização.',
+			'Otimização de Canais de Atendimento: Como diretor de atendimento, quero monitorar o uso dos diferentes canais de atendimento (app, internet banking, telefone, agência), para que possa identificar os preferidos pelos clientes, otimizar a experiência em cada canal e direcionar investimentos de forma eficiente.',
+			'Prevenção de Churn (Evasão de Clientes): Como analista de risco, quero identificar sinais de insatisfação ou intenção de deixar o banco (diminuição de transações, reclamações, etc.), para que possa acionar ações proativas de retenção, como ofertas personalizadas ou contato da equipe de relacionamento.',
+			'Análise de Crédito Inteligente: Como gestor de crédito, quero utilizar modelos de machine learning para analisar o histórico financeiro e o comportamento do cliente, para que possa tomar decisões de crédito mais rápidas, precisas e personalizadas, reduzindo o risco de inadimplência.',
+			'Monitoramento de Fraudes: Como especialista em segurança, quero analisar padrões de transações e identificar anomalias em tempo real, para que possa detectar e prevenir fraudes, protegendo o patrimônio do cliente e a reputação do banco.',
+			'Melhoria da Experiência do Cliente: Como gerente de experiência do cliente, quero coletar e analisar o feedback dos clientes em diferentes pontos de contato (pesquisas, redes sociais, etc.), para que possa identificar pontos de melhoria na jornada do cliente e implementar soluções que aumentem a satisfação e o engajamento.'			
+
             ], 
             key="user_story", 
 
