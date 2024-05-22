@@ -43,20 +43,12 @@ persona_type = st.text_input(
 
 
 user_story = st.selectbox ('Selecione um tema:', [
-			'Descoberta: Como cliente, quero encontrar facilmente produtos relevantes para minhas necessidades, tanto online quanto na loja física.',
-			'Pesquisa e Comparação: Como cliente, quero comparar preços, características e avaliações de produtos similares para tomar a melhor decisão de compra.',
-			'Compra (Online): Como cliente, quero um processo de compra online intuitivo, seguro e com diversas opções de pagamento e entrega.',
-			'Compra (Loja Física): Como cliente, quero encontrar facilmente os produtos na loja, receber auxílio de vendedores atenciosos e ter um checkout rápido e eficiente.',
-			'Pós-Compra (Online): Como cliente, quero acompanhar o status do meu pedido, receber notificações sobre a entrega e ter opções fáceis de troca ou devolução.',
-			'Pós-Compra (Loja Física): Como cliente, quero trocar ou devolver produtos sem complicações e receber suporte para dúvidas ou problemas.',
-			'Fidelização: Como cliente, quero ser reconhecido e recompensado por minhas compras, receber ofertas personalizadas e participar de programas de fidelidade.',
-			'Loja Física: Como cliente, quero receber atendimento atencioso e personalizado de vendedores que conheçam bem os produtos e possam me ajudar a encontrar o que preciso.',
-			'Online (Chat/E-mail): Como cliente, quero ter acesso a canais de atendimento online eficientes, com respostas rápidas e soluções eficazes para minhas dúvidas ou problemas.',
-			'Central de Atendimento: Como cliente, quero falar com atendentes capacitados e resolver meus problemas de forma rápida e satisfatória.',
-			'Canais de Autoatendimento: Como cliente, quero encontrar informações e soluções para problemas comuns através de FAQs, tutoriais em vídeo e chatbots.',
-			'Personalização: Como cliente, quero receber recomendações de produtos, ofertas e conteúdo relevantes para meus interesses e histórico de compras.',
-			'Omnichannel: Como cliente, quero uma experiência de compra integrada, com acesso aos mesmos produtos, informações e serviços em todos os canais de venda (online e offline).',
-			'Sustentabilidade: Como cliente, quero ter acesso a informações sobre a origem e impacto ambiental dos produtos, além de opções de compra e descarte mais sustentáveis.'
+				'1. Recomendação de Produtos Personalizada: Como Consultora de Beleza, desejo ter acesso a um sistema de CRM que utilize algoritmos de recomendação baseados em dados demográficos, histórico de compras e preferências das clientes, para que eu possa oferecer sugestões de produtos altamente personalizadas, maximizando o potencial de vendas e a satisfação do cliente.',
+				'2. Otimização da Gestão de Estoque: Como Gerente de Vendas, necessito de um painel de controle com visualização em tempo real dos níveis de estoque, vendas por SKU e desempenho por região/consultora, a fim de identificar gargalos na cadeia de suprimentos, otimizar a alocação de estoque e prevenir rupturas ou excessos, garantindo a disponibilidade dos produtos e a eficiência logística.',
+				'3. Treinamento Personalizado para a Força de Vendas: Como Gerente de Treinamento, desejo analisar o desempenho individual das consultoras, utilizando métricas como taxa de conversão, ticket médio e feedback de clientes, para que eu possa desenvolver programas de treinamento personalizados, abordando as necessidades específicas de cada consultora e aprimorando suas habilidades de vendas e conhecimento do portfólio de produtos.',
+				'4. Análise Preditiva de Tendências e Lançamentos: Como Diretor de Marketing, requiro um sistema de inteligência de mercado que utilize técnicas de mineração de dados e análise de sentimentos em redes sociais, blogs e outras fontes relevantes, a fim de identificar tendências emergentes, prever a demanda do consumidor e orientar o desenvolvimento de novos produtos e estratégias de lançamento que estejam alinhados com as expectativas do mercado.',
+				'5. Implementação de Programa de Fidelidade Personalizado: Como Gerente de Relacionamento com o Cliente, necessito de segmentar a base de clientes com base em dados comportamentais e transacionais, para que eu possa desenvolver um programa de fidelidade com níveis diferenciados, oferecendo recompensas personalizadas, benefícios exclusivos e comunicação direcionada, visando aumentar a retenção, o lifetime value e o engajamento do cliente.',
+				'6. Monitoramento da Concorrência e Inteligência Competitiva: Como Analista de Mercado, desejo acesso a um sistema de inteligência competitiva que monitore os principais concorrentes, seus lançamentos, preços, promoções e estratégias de marketing, a fim de identificar oportunidades e ameaças, ajustar as estratégias da empresa e manter a competitividade no mercado.'
             ], 
             key="user_story", 
 
