@@ -37,17 +37,18 @@ persona_name = st.text_input(
     "Persona: \n\n", key="persona_name", value="Breno Cabral"
 )
 persona_type = st.text_input(
-    "Tipo de persona? \n\n", key="persona_type", value="Paciente"
+    "Tipo de persona? \n\n", key="persona_type", value="Customer"
 )
 
 
 
 user_story = st.selectbox ('Selecione um tema:', [
-            'Prontuário: Como profissional de saúde, quero acessar o prontuário eletrônico do paciente de forma rápida para agilizar o atendimento.',
-            'Prescrição: Como médico, quero prescrever medicamentos eletronicamente para facilitar a vida do paciente.',
-            'Telemedicina: Como médico, quero realizar consultas online para atender pacientes remotamente.',
-            'Integração: Como gestor de saúde, quero integrar sistemas de informação para otimizar processos.',
-            'Dados: Como pesquisador, quero acessar dados de saúde anonimizados para estudos epidemiológicos.' 
+				'1. Recomendação de Produtos Personalizada: Como Consultora de Beleza, desejo ter acesso a um sistema de CRM que utilize algoritmos de recomendação baseados em dados demográficos, histórico de compras e preferências das clientes, para que eu possa oferecer sugestões de produtos altamente personalizadas, maximizando o potencial de vendas e a satisfação do cliente.',
+				'2. Otimização da Gestão de Estoque: Como Gerente de Vendas, necessito de um painel de controle com visualização em tempo real dos níveis de estoque, vendas por SKU e desempenho por região/consultora, a fim de identificar gargalos na cadeia de suprimentos, otimizar a alocação de estoque e prevenir rupturas ou excessos, garantindo a disponibilidade dos produtos e a eficiência logística.',
+				'3. Treinamento Personalizado para a Força de Vendas: Como Gerente de Treinamento, desejo analisar o desempenho individual das consultoras, utilizando métricas como taxa de conversão, ticket médio e feedback de clientes, para que eu possa desenvolver programas de treinamento personalizados, abordando as necessidades específicas de cada consultora e aprimorando suas habilidades de vendas e conhecimento do portfólio de produtos.',
+				'4. Análise Preditiva de Tendências e Lançamentos: Como Diretor de Marketing, requiro um sistema de inteligência de mercado que utilize técnicas de mineração de dados e análise de sentimentos em redes sociais, blogs e outras fontes relevantes, a fim de identificar tendências emergentes, prever a demanda do consumidor e orientar o desenvolvimento de novos produtos e estratégias de lançamento que estejam alinhados com as expectativas do mercado.',
+				'5. Implementação de Programa de Fidelidade Personalizado: Como Gerente de Relacionamento com o Cliente, necessito de segmentar a base de clientes com base em dados comportamentais e transacionais, para que eu possa desenvolver um programa de fidelidade com níveis diferenciados, oferecendo recompensas personalizadas, benefícios exclusivos e comunicação direcionada, visando aumentar a retenção, o lifetime value e o engajamento do cliente.',
+				'6. Monitoramento da Concorrência e Inteligência Competitiva: Como Analista de Mercado, desejo acesso a um sistema de inteligência competitiva que monitore os principais concorrentes, seus lançamentos, preços, promoções e estratégias de marketing, a fim de identificar oportunidades e ameaças, ajustar as estratégias da empresa e manter a competitividade no mercado.'
             ], 
             key="user_story", 
 
@@ -204,12 +205,12 @@ if generate_python and promptSnippets:
 
 promptBigQuery = """
 
-## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Saúde)
+## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Varejo)
 
 **Instruções para o Modelo:**
 
 1. **Recebimento da Sugestão:**
-   - Receba a sugestão de tabela DW gerada anteriormente para o contexto de saúde, incluindo:
+   - Receba a sugestão de tabela DW gerada anteriormente para o contexto de varejo, incluindo:
       - Nome da tabela
       - Dimensões (com seus atributos e tipos de dados)
       - Fatos (com suas métricas e tipos de dados)
@@ -220,7 +221,7 @@ promptBigQuery = """
      ```bash
      gcloud bigquery datasets create [NOME_DO_DATASET] --location=[LOCALIZAÇÃO]
      ```
-     - Substitua `[NOME_DO_DATASET]` por um nome relevante para o contexto de saúde (ex: `dados_saude`).
+     - Substitua `[NOME_DO_DATASET]` por um nome relevante para o contexto de varejo (ex: `dados_varejo`).
      - Substitua `[LOCALIZAÇÃO]` pela localização geográfica do dataset (ex: `southamerica-east1`).
 
 3. **Criação das Tabelas de Dimensão:**
@@ -234,8 +235,8 @@ promptBigQuery = """
      );
      ```
      - Substitua `[NOME_DO_DATASET]` pelo nome do dataset criado.
-     - Substitua `[NOME_DA_DIMENSÃO]` pelo nome da dimensão (ex: `Paciente`, `Profissional_Saude`, `Procedimento_Medico`).
-     - Substitua `[ID_DIMENSÃO]` pelo nome do atributo chave primária da dimensão (ex: `ID_Paciente`, `ID_Profissional`, `ID_Procedimento`).
+     - Substitua `[NOME_DA_DIMENSÃO]` pelo nome da dimensão (ex: `Cliente`, `Produto`, `Loja`, `Tempo`).
+     - Substitua `[ID_DIMENSÃO]` pelo nome do atributo chave primária da dimensão (ex: `ID_Cliente`, `ID_Produto`, `ID_Loja`, `ID_Tempo`).
      - Substitua `[TIPO_DE_DADO]` pelo tipo de dado apropriado para cada atributo (ex: `INTEGER`, `STRING`, `DATE`, `FLOAT`).
 
 4. **Criação da Tabela de Fato:**
@@ -251,34 +252,34 @@ promptBigQuery = """
          ...
      );
      ```
-     - Substitua `[NOME_DA_TABELA_FATO]` pelo nome da tabela de fato (ex: `Fato_Consulta`).
-     - Substitua `[FK_DIMENSÃO]` pelos nomes das chaves estrangeiras que se referem às dimensões (ex: `FK_Paciente`, `FK_Profissional`).
-     - Substitua `[METRICA]` pelos nomes das métricas (ex: `Duracao_Consulta`, `Custo_Procedimento`).
+     - Substitua `[NOME_DA_TABELA_FATO]` pelo nome da tabela de fato (ex: `Fato_Vendas`).
+     - Substitua `[FK_DIMENSÃO]` pelos nomes das chaves estrangeiras que se referem às dimensões (ex: `FK_Cliente`, `FK_Produto`, `FK_Loja`, `FK_Tempo`).
+     - Substitua `[METRICA]` pelos nomes das métricas (ex: `Quantidade_Vendida`, `Valor_Total`).
 
 5. **Inserção de Dados (Opcional):**
    - Se a sugestão incluir exemplos de dados, gere comandos SQL `INSERT INTO` para inserir esses dados nas tabelas criadas.
 
-**Exemplo de Prompt (Saúde):**
+**Exemplo de Prompt (Varejo):**
 
 ```
 Sugestão de Tabela DW:
 
-Nome da Tabela: Fato_Consulta
+Nome da Tabela: Fato_Vendas
 
 Dimensões:
-- Paciente (ID_Paciente INTEGER, Nome STRING, Data_Nascimento DATE)
-- Profissional_Saude (ID_Profissional INTEGER, Nome STRING, Especialidade STRING)
-- Procedimento_Medico (ID_Procedimento INTEGER, Descricao STRING)
+- Cliente (ID_Cliente INTEGER, Nome STRING, Sexo STRING, Faixa_Etaria STRING)
+- Produto (ID_Produto INTEGER, Nome STRING, Categoria STRING, Subcategoria STRING)
+- Loja (ID_Loja INTEGER, Nome STRING, Cidade STRING, Estado STRING)
+- Tempo (ID_Tempo DATE, Ano INTEGER, Trimestre INTEGER, Mês INTEGER, Dia INTEGER)
 
 Fatos:
-- Data_Consulta DATE
-- Duracao_Consulta INTEGER
-- Custo_Procedimento FLOAT
+- Data_Venda DATE
+- Quantidade_Vendida INTEGER
+- Valor_Total FLOAT
+- Forma_Pagamento STRING
 
 Crie as tabelas no BigQuery e gere os comandos SQL necessários.
 ```
-
-
 Dados:
 """ + st.session_state["response"]
 

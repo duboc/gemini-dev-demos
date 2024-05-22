@@ -37,17 +37,19 @@ persona_name = st.text_input(
     "Persona: \n\n", key="persona_name", value="Breno Cabral"
 )
 persona_type = st.text_input(
-    "Tipo de persona? \n\n", key="persona_type", value="Paciente"
+    "Tipo de persona? \n\n", key="persona_type", value="Customer"
 )
 
 
 
 user_story = st.selectbox ('Selecione um tema:', [
-            'Prontuário: Como profissional de saúde, quero acessar o prontuário eletrônico do paciente de forma rápida para agilizar o atendimento.',
-            'Prescrição: Como médico, quero prescrever medicamentos eletronicamente para facilitar a vida do paciente.',
-            'Telemedicina: Como médico, quero realizar consultas online para atender pacientes remotamente.',
-            'Integração: Como gestor de saúde, quero integrar sistemas de informação para otimizar processos.',
-            'Dados: Como pesquisador, quero acessar dados de saúde anonimizados para estudos epidemiológicos.' 
+	'Otimização de Rotas: Como gestor de operações, quero visualizar a rota mais eficiente para cada motorista, considerando tempo de deslocamento, tipo de serviço e prioridade, para que possa reduzir custos com combustível e tempo de viagem.',
+	'Monitoramento em Tempo Real: Como supervisor de campo, quero acompanhar em tempo real a localização de cada motorista e o status de cada serviço, para que possa identificar atrasos, redirecionar recursos e garantir o cumprimento dos prazos.',
+	'Análise de Desempenho: Como analista de dados, quero acessar relatórios sobre o tempo médio de cada serviço, a distância percorrida por motorista e o número de serviços concluídos por dia, para que possa identificar gargalos, otimizar processos e avaliar o desempenho da equipe.',
+	'Previsão de Demanda: Como gerente de planejamento, quero utilizar dados históricos para prever a demanda de serviços por região e período, para que possa alocar recursos de forma eficiente e evitar ociosidade ou sobrecarga dos motoristas.',
+	'Feedback dos Clientes: Como gestor de relacionamento com o cliente, quero coletar e analisar o feedback dos clientes sobre o atendimento prestado pelos motoristas, para que possa identificar pontos de melhoria e garantir a satisfação dos clientes.',
+	'Integração com Sistemas de Gestão: Como administrador de sistemas, quero integrar a plataforma de roteirização com outros sistemas da empresa, como ERP e CRM, para que possa ter uma visão completa da operação e tomar decisões mais assertivas.'
+
             ], 
             key="user_story", 
 
@@ -204,12 +206,12 @@ if generate_python and promptSnippets:
 
 promptBigQuery = """
 
-## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Saúde)
+## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Energia)
 
 **Instruções para o Modelo:**
 
 1. **Recebimento da Sugestão:**
-   - Receba a sugestão de tabela DW gerada anteriormente para o contexto de saúde, incluindo:
+   - Receba a sugestão de tabela DW gerada anteriormente para o contexto de energia, incluindo:
       - Nome da tabela
       - Dimensões (com seus atributos e tipos de dados)
       - Fatos (com suas métricas e tipos de dados)
@@ -220,7 +222,7 @@ promptBigQuery = """
      ```bash
      gcloud bigquery datasets create [NOME_DO_DATASET] --location=[LOCALIZAÇÃO]
      ```
-     - Substitua `[NOME_DO_DATASET]` por um nome relevante para o contexto de saúde (ex: `dados_saude`).
+     - Substitua `[NOME_DO_DATASET]` por um nome relevante para o contexto de energia (ex: `dados_energia`).
      - Substitua `[LOCALIZAÇÃO]` pela localização geográfica do dataset (ex: `southamerica-east1`).
 
 3. **Criação das Tabelas de Dimensão:**
@@ -234,8 +236,8 @@ promptBigQuery = """
      );
      ```
      - Substitua `[NOME_DO_DATASET]` pelo nome do dataset criado.
-     - Substitua `[NOME_DA_DIMENSÃO]` pelo nome da dimensão (ex: `Paciente`, `Profissional_Saude`, `Procedimento_Medico`).
-     - Substitua `[ID_DIMENSÃO]` pelo nome do atributo chave primária da dimensão (ex: `ID_Paciente`, `ID_Profissional`, `ID_Procedimento`).
+     - Substitua `[NOME_DA_DIMENSÃO]` pelo nome da dimensão (ex: `Cliente`, `Equipe_Tecnica`, `Tipo_Servico`).
+     - Substitua `[ID_DIMENSÃO]` pelo nome do atributo chave primária da dimensão (ex: `ID_Cliente`, `ID_Equipe`, `ID_Servico`).
      - Substitua `[TIPO_DE_DADO]` pelo tipo de dado apropriado para cada atributo (ex: `INTEGER`, `STRING`, `DATE`, `FLOAT`).
 
 4. **Criação da Tabela de Fato:**
@@ -251,35 +253,34 @@ promptBigQuery = """
          ...
      );
      ```
-     - Substitua `[NOME_DA_TABELA_FATO]` pelo nome da tabela de fato (ex: `Fato_Consulta`).
-     - Substitua `[FK_DIMENSÃO]` pelos nomes das chaves estrangeiras que se referem às dimensões (ex: `FK_Paciente`, `FK_Profissional`).
-     - Substitua `[METRICA]` pelos nomes das métricas (ex: `Duracao_Consulta`, `Custo_Procedimento`).
+     - Substitua `[NOME_DA_TABELA_FATO]` pelo nome da tabela de fato (ex: `Fato_Ordem_Servico`).
+     - Substitua `[FK_DIMENSÃO]` pelos nomes das chaves estrangeiras que se referem às dimensões (ex: `FK_Cliente`, `FK_Equipe`).
+     - Substitua `[METRICA]` pelos nomes das métricas (ex: `Duracao_Servico`, `Distancia_Percorrida`).
 
 5. **Inserção de Dados (Opcional):**
    - Se a sugestão incluir exemplos de dados, gere comandos SQL `INSERT INTO` para inserir esses dados nas tabelas criadas.
 
-**Exemplo de Prompt (Saúde):**
+**Exemplo de Prompt (Energia):**
 
 ```
 Sugestão de Tabela DW:
 
-Nome da Tabela: Fato_Consulta
+Nome da Tabela: Fato_Ordem_Servico
 
 Dimensões:
-- Paciente (ID_Paciente INTEGER, Nome STRING, Data_Nascimento DATE)
-- Profissional_Saude (ID_Profissional INTEGER, Nome STRING, Especialidade STRING)
-- Procedimento_Medico (ID_Procedimento INTEGER, Descricao STRING)
+- Cliente (ID_Cliente INTEGER, Nome STRING, Endereco STRING, Tipo_Residencia STRING)
+- Equipe_Tecnica (ID_Equipe INTEGER, Nome_Supervisor STRING, Numero_Tecnicos INTEGER)
+- Tipo_Servico (ID_Servico INTEGER, Descricao STRING, Categoria STRING)
 
 Fatos:
-- Data_Consulta DATE
-- Duracao_Consulta INTEGER
-- Custo_Procedimento FLOAT
+- Data_Servico DATE
+- Duracao_Servico FLOAT
+- Distancia_Percorrida FLOAT
+- Material_Utilizado STRING
 
 Crie as tabelas no BigQuery e gere os comandos SQL necessários.
 ```
 
-
-Dados:
 """ + st.session_state["response"]
 
 st.divider()

@@ -18,10 +18,10 @@ if reset := st.button("Reset Demo State"):
 embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@latest")
 llm = VertexAI(model_name="gemini-experimental")
 
-st.header("Code Chat with RAG", divider="rainbow")
+st.header("Code Generation with RAG", divider="rainbow")
 
 st.info(
-        "💡 **Observação:** Se o repositório for grande, a indexação pode levar um tempo. \n"
+        "💡 **Observação:** Se o repositório for grande, a indexação pode levar um tempo."
         "Isso é normal, pois estamos analisando e organizando todo o código para facilitar a busca e resposta às suas perguntas. 😊"
     )
 
@@ -68,9 +68,9 @@ st.divider()
 
 template = """
 Initial context: Always think step by step.
-The conversation interface is a chat tool acting a knowledge base for a repository codebase. Be concise and polite. 
-Your mission is to answer all code related questions with given context and instructions.
-The entire codebase is embeded and if you need more context, ask a question back"""
+The conversation interface is a chat tool acting a code generation using as a codebase for rag. Be concise and polite. 
+Your mission is to answer all code related questions with given context and instructions. 
+lways generate the code with markdown, and always end with a suggestion for the next piece of code"""
 
 
 
