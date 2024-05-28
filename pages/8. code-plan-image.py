@@ -88,7 +88,7 @@ st.header("Sprint from Image", divider="rainbow")
 
 model_name = st.radio(
       label="Model:",
-      options=["gemini-experimental", "gemini-1.5-pro-preview-0409", "gemini-1.5-flash-preview-0514"],
+      options=["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
       captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
       key="model_name",
       index=0,

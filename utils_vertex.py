@@ -25,8 +25,8 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 
 model_gemini_pro = GenerativeModel("gemini-1.0-pro")
-model_gemini_pro_15 = GenerativeModel("gemini-1.5-pro-preview-0514")
-model_gemini_flash = GenerativeModel("gemini-1.5-flash-preview-0514")
+model_gemini_pro_15 = GenerativeModel("gemini-1.5-pro-001")
+model_gemini_flash = GenerativeModel("gemini-1.5-flash-001")
 model_experimental = GenerativeModel("gemini-experimental")
 multimodal_model_pro = GenerativeModel("gemini-1.0-pro-vision")
 multimodal_embeddings = MultiModalEmbeddingModel.from_pretrained(

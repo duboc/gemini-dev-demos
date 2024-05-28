@@ -104,7 +104,7 @@ model_region = st.radio(
 load_vertex(model_region)
 model_name = st.radio(
       label="Model:",
-      options=["gemini-experimental", "gemini-1.5-pro-preview-0514", "gemini-1.5-flash-preview-0514"],
+      options=["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
       captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
       key="model_name",
       index=0,
@@ -165,19 +165,13 @@ You're evaluating a mobile app for an online pharmacy. Your goal is to identify 
 | View medication details     | Important dosage information is buried in small text.        | Medium   | Display dosage prominently near the top of the medication details screen.     |
 
 
-
-**Why This Prompt is Improved:**
-
-* **Clearer Focus:** The prompt explicitly outlines the areas of UX to analyze.
-* **Actionable Output:** The table format ensures that the friction log is organized and easy for the development team to act on.
-* **Prioritization:** The severity rating helps identify the most critical issues.
-
             """
             vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
             if promptSelenium:
                 response = get_gemini_pro_vision_response( multimodal_model_pro, [promptSelenium, vide_desc_img])
                 st.session_state["selenium"] = response
                 st.markdown(response)
+                print(response)
                 st.markdown("\n\n\n")
         with first_tab2:
             st.write("Prompt used:")
@@ -186,46 +180,42 @@ You're evaluating a mobile app for an online pharmacy. Your goal is to identify 
 
 st.subheader("User Story", divider="green")
 generate_user_story = st.button("Criar user story log", key="generate_user_story")
-output_type = st.radio(
-            "Select the output type",
-            ["text", "table", "json"],
-            key="output_type",
-            horizontal=True,
-        )
 if generate_user_story:
     with st.spinner("Generating your user story using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
             promptUserStory = f""" All the answers are to be provided in {story_lang} 
-            Resuma o friction log em uma lista de user story. Crie quantas forem necessárias. 
-                Write a User story based on the following premise: \n
-                persona_name: [persona_name] \n
-                persona_type: [persona_type] \n
-                user_story: [user_story] \n
-                 First start by giving the user Story an Summary: [concise, memorable, human-readable story title] 
-             User Story Format example:
-                As a: [Suggest a persona]
-                I want to: [Action or Goal]
-                So that: [Benefit or Value]
-                Additional Context: [Optional details about the scenario, environment, or specific requirements]
-             Acceptance Criteria: [Specific, measurable conditions that must be met for the story to be considered complete]
-               *   **Scenario**: \n
-                        [concise, human-readable user scenario]
-               *   **Given**: \n
-                       [Initial context]
-               *   **and Given**: \n
-                        [Additional Given context]
-                *   **and Given** \n
-                        [additional Given context statements as needed]
-                *   **When**: \n
-                        [Event occurs]
-                *   **Then**: \n
-                        [Expected outcome]
-            Coloque o resultado no formato de {output_type} """ + "\n" + st.session_state["selenium"]
+                    Group the friction log that are similar into a user story, present with a table.
+
+                    **Input:**
+
+                    * **Task:** The user's goal
+                    * **Friction Point:** The specific obstacle
+                    * **Severity:** High, Medium, or Low
+                    * **Recommendation:** Proposed solution
+
+                    **Output:**
+
+                    1. **User Story Format:**  Concise user stories following this template:
+                       * "As a [type of user], I want to [action] so that [benefit]." 
+
+                    2. **Prioritization:**  Rank the user stories based on the severity of the friction points in the log.
+
+                    3. **Additional Details:** Optionally, include details about the friction point and recommended solution from the log to give context to the development team.
+
+                    **Example of Detailed User Story:**
+
+                    * **Priority:** High
+                    * **User Story:** "As a customer, I want to refill my prescriptions with one click so that I can save time."
+                    * **Details:** Currently, refilling a prescription requires the user to scroll through past orders, which is time-consuming. A "Refill" button should be added directly to the order details screen.
+
+
+            """ + "\n" + st.session_state["selenium"]
             vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
             if promptUserStory:
-                response = get_gemini_pro_vision_response( multimodal_model_pro, [promptUserStory, vide_desc_img])
-                st.markdown(response)
+                responseStory = get_gemini_pro_vision_response( multimodal_model_pro, [promptUserStory, vide_desc_img])
+                st.markdown(responseStory)
+                print(responseStory)
                 st.markdown("\n\n\n")
         with first_tab2:
             st.write("Prompt used:")

@@ -3,7 +3,7 @@
 This application showcases the capabilities of Google's Gemini AI models in various software development tasks. Built using Streamlit, it offers interactive demos that highlight Gemini's potential for code analysis, test plan generation, user story creation, and code snippet generation, leveraging advanced techniques like Retrieval Augmented Generation (RAG) and multimodal processing.
 
 Live demo:
-https://genai-re-demos-nhgqlpa4za-uc.a.run.app/=
+https://genai-re-demos-nhgqlpa4za-uc.a.run.app
 
 
 ## Demo Highlights

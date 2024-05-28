@@ -6,7 +6,7 @@ import streamlit as st
 def load_models(model_name):
     if model_name == "gemini-experimental":
         model = model_experimental
-    elif model_name == "gemini-1.5-pro-preview-0514":
+    elif model_name == "gemini-1.5-pro-001":
         model = model_gemini_pro_15
     else:
         model = model_gemini_flash
@@ -24,7 +24,7 @@ st.subheader("Generate a User Story")
 # Story premise
 model_name = st.radio(
       label="Model:",
-      options=["gemini-experimental", "gemini-1.5-pro-preview-0514", "gemini-1.5-flash-preview-0514"],
+      options=["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
       captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
       key="model_name",
       index=0,

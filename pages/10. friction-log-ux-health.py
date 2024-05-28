@@ -106,7 +106,7 @@ model_region = st.radio(
 load_vertex(model_region)
 model_name = st.radio(
       label="Model:",
-      options=["gemini-experimental", "gemini-1.5-pro-preview-0514", "gemini-1.5-flash-preview-0514"],
+      options=["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
       captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
       key="model_name",
       index=0,
@@ -127,62 +127,7 @@ st.divider()
 st.markdown( """Gemini Pro Vision can also provide the description of what is going on in the video:""" )
 vide_desc_uri = "gs://convento-samples/friction-log.mp4"
 video_desc_url = ("https://storage.googleapis.com/" + vide_desc_uri.split("gs://")[1])
-
-if vide_desc_uri:
-    vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
-    st.video(video_desc_url)
-    st.write("Our expectation: Generate a friction log from the video.")
-    prompt = f""" All the answers are to be provided in {story_lang}
-    
-            Describe what is happening in the video and answer the following questions: \n
-
-            
-            **Context:** I have a video showcasing a series of tasks being performed on a web browser. I need a detailed description of each action taken. 
-
-            **Input:** [video_data]
-
-            **Output:**
-
-            * **Timestamped list of actions:** Provide a list of actions taken in the video, along with their timestamps (e.g., "0:10 - User clicks the 'Sign In' button.").
-            * **Detailed description:** For each action, provide a clear and concise description of what is happening. Include:
-                    * **What is being clicked/selected/typed?**
-                    * **What is the purpose of the action?**
-                    * **Any relevant context or information displayed on the screen.**
-            * **Visual aids:** If possible, include annotations of the video to help visualize the actions.
-
-            **Example:**
-
-                **Timestamp:** 0:10
-                **Action:** User clicks the "Sign In" button.
-                **Description:** The user clicks the blue "Sign In" button located in the top right corner of the screen. This action initiates the login process.
-
-            **Additional notes:**
-
-                * **Focus on user interactions:** The description should focus on the user's actions and the visible results on the screen.
-                * **Avoid technical jargon:** Use clear and simple language that anyone can understand.
-                * **Pay attention to details:** Capture all relevant information, including specific button names, website URLs, and any error messages.
-
-                **Please note:** The more detailed and accurate your description is, the more helpful it will be for me to understand the video.
-
-            """
-    tab1, tab2 = st.tabs(["Response", "Prompt"])
-    vide_desc_description = st.button(
-        "Generate", key="vide_desc_description"
-    )
-    with tab1:
-        if vide_desc_description and prompt:
-            with st.spinner(
-                "Generating video description using Gemini Pro..."
-            ):
-                response = get_gemini_pro_vision_response(
-                    multimodal_model_pro, [prompt, vide_desc_img]
-                )
-                st.markdown(response)
-                st.markdown("\n\n\n")
-                st.session_state["response"] = response
-    with tab2:
-        st.write("Prompt used:")
-        st.write(prompt, "\n", "{video_data}")
+st.video(video_desc_url)
 
 st.subheader("Friction Log", divider="green")
 generate_selenium = st.button("Criar friction log", key="generate_selenium")
@@ -191,12 +136,44 @@ if generate_selenium:
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
             promptSelenium = f""" All the answers are to be provided in {story_lang}
-            Crie um friction log de ux no formato de tasks com as melhorias. coloque em formato de tabela.""" + "\n" + st.session_state["response"]
+**Prompt for UX Friction Log**
+
+**Context:**
+
+You're evaluating a web app for an health providcer. Your goal is to identify specific areas where the user experience (UX) could be improved. Focus on the following key aspects:
+
+* **Task Flow:**  Analyze the steps users take to complete common actions (e.g., search for a medication, refill a prescription, check order status).
+* **Interaction Design:** Evaluate how easy it is to use buttons, menus, forms, and other interactive elements.
+* **Information Architecture:** Assess how information is organized and presented (e.g., product listings, prescription details, account settings).
+* **Visual Design:** Consider if the app's visual appearance is clear, aesthetically pleasing, and supports usability.
+
+**Deliverable:**
+
+1. **UX Friction Log (Table):**
+   * **Task:**  The specific action the user is trying to accomplish.
+   * **Friction Point:** The exact step or element within the task flow that causes difficulty, confusion, or frustration.
+   * **Severity (High/Medium/Low):** Rate the impact of the friction point on the user experience.
+   * **Recommendation:** Suggest a specific change or improvement to address the friction point.
+
+2. **Optional (but valuable):** Include screenshots or screen recordings to illustrate friction points. 
+
+**Example Table:**
+
+| Task                          | Friction Point                                           | Severity | Recommendation                                                                    |
+| ----------------------------- | --------------------------------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| Search for medication        | Search bar is not easily visible on the home screen.          | Medium   | Place the search bar prominently at the top of the home screen.                 |
+| Refill a prescription       | Process requires excessive scrolling through past orders. | High    | Add a direct "Refill" button on the order details screen.                       |
+| Check order status           | Confusing navigation to the order status page.              | Low     | Add a clear "Order Status" link in the main navigation menu.                    |
+| View medication details     | Important dosage information is buried in small text.        | Medium   | Display dosage prominently near the top of the medication details screen.     |
+
+
+            """
             vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
             if promptSelenium:
                 response = get_gemini_pro_vision_response( multimodal_model_pro, [promptSelenium, vide_desc_img])
                 st.session_state["selenium"] = response
                 st.markdown(response)
+                print(response)
                 st.markdown("\n\n\n")
         with first_tab2:
             st.write("Prompt used:")
@@ -205,46 +182,42 @@ if generate_selenium:
 
 st.subheader("User Story", divider="green")
 generate_user_story = st.button("Criar user story log", key="generate_user_story")
-output_type = st.radio(
-            "Select the output type",
-            ["text", "table", "json"],
-            key="output_type",
-            horizontal=True,
-        )
 if generate_user_story:
     with st.spinner("Generating your user story using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
             promptUserStory = f""" All the answers are to be provided in {story_lang} 
-            Resuma o friction log em uma lista de user story. Crie quantas forem necessárias. 
-                Write a User story based on the following premise: \n
-                persona_name: [persona_name] \n
-                persona_type: [persona_type] \n
-                user_story: [user_story] \n
-                 First start by giving the user Story an Summary: [concise, memorable, human-readable story title] 
-             User Story Format example:
-                As a: [Suggest a persona]
-                I want to: [Action or Goal]
-                So that: [Benefit or Value]
-                Additional Context: [Optional details about the scenario, environment, or specific requirements]
-             Acceptance Criteria: [Specific, measurable conditions that must be met for the story to be considered complete]
-               *   **Scenario**: \n
-                        [concise, human-readable user scenario]
-               *   **Given**: \n
-                       [Initial context]
-               *   **and Given**: \n
-                        [Additional Given context]
-                *   **and Given** \n
-                        [additional Given context statements as needed]
-                *   **When**: \n
-                        [Event occurs]
-                *   **Then**: \n
-                        [Expected outcome]
-            Coloque o resultado no formato de {output_type} """ + "\n" + st.session_state["selenium"]
+                    Group the friction log that are similar into a user story, present with a table.
+
+                    **Input:**
+
+                    * **Task:** The user's goal
+                    * **Friction Point:** The specific obstacle
+                    * **Severity:** High, Medium, or Low
+                    * **Recommendation:** Proposed solution
+
+                    **Output:**
+
+                    1. **User Story Format:**  Concise user stories following this template:
+                       * "As a [type of user], I want to [action] so that [benefit]." 
+
+                    2. **Prioritization:**  Rank the user stories based on the severity of the friction points in the log.
+
+                    3. **Additional Details:** Optionally, include details about the friction point and recommended solution from the log to give context to the development team.
+
+                    **Example of Detailed User Story:**
+
+                    * **Priority:** High
+                    * **User Story:** "As a customer, I want to refill my prescriptions with one click so that I can save time."
+                    * **Details:** Currently, refilling a prescription requires the user to scroll through past orders, which is time-consuming. A "Refill" button should be added directly to the order details screen.
+
+
+            """ + "\n" + st.session_state["selenium"]
             vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
             if promptUserStory:
-                response = get_gemini_pro_vision_response( multimodal_model_pro, [promptUserStory, vide_desc_img])
-                st.markdown(response)
+                responseStory = get_gemini_pro_vision_response( multimodal_model_pro, [promptUserStory, vide_desc_img])
+                st.markdown(responseStory)
+                print(responseStory)
                 st.markdown("\n\n\n")
         with first_tab2:
             st.write("Prompt used:")
