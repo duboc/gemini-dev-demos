@@ -69,6 +69,13 @@ length_of_story = st.radio(
     horizontal=True,
 )
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 prompt = f"""Write a {length_of_story} User story based on the following premise: \n
       persona_name: {persona_name} \n
       persona_type: {persona_type} \n
@@ -92,7 +99,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
                     [Event occurs]
             *   **Then**: \n
                     [Expected outcome]
-        Todas as respostas precisam estar em português e utilizar sempre a persona indicada. 
+        All the answers are required to be in {story_lang} and to stick to the persona. 
       """
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
@@ -110,7 +117,7 @@ if generate_t2t and prompt:
         
 
 
-promptTasks = """
+promptTasks = f"""All the answers are required to be in {story_lang} and to stick to the persona. 
 Divida a história de usuário em tarefas o mais granular possível. 
 O objetivo de fragmentar uma história de usuário é criar uma lista de tarefas que possam ser concluídas dentro de um sprint. 
 Portanto, é importante dividir a história em tarefas mínimas que ainda agreguem valor ao usuário final. 
@@ -132,7 +139,7 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """Análise da User Story:
+promptSnippets = f"""Análise da User Story:
 
 Exemplo:
 User Story: "Como médico, quero poder acompanhar o histórico de consultas dos meus pacientes, incluindo datas, diagnósticos, procedimentos realizados e medicamentos prescritos."
@@ -192,6 +199,8 @@ Defina os tipos de dados adequados para cada coluna.
 
 Inclua exemplos de dados que poderiam ser inseridos na tabela DW, com base nas tasks da user story.  
 
+All the answers are required to be in {story_lang} and to stick to the persona. 
+
 Sempre ao gerar dados mock, utilize algum nome da seguinte lista:
 Breno, Amadei, Carlos, Mazurque, Kauy, Filipe, Renato, Wilgner, Rober, Diego, Iago, Tiago, Brunno, Koba
 Utilize o dados abaixo como entrada. 
@@ -211,7 +220,7 @@ if generate_python and promptSnippets:
         with first_tab2:
             st.text(promptSnippets)
 
-promptBigQuery = """
+promptBigQuery = f"""
 
 Instruções para o Modelo:
 
@@ -229,7 +238,7 @@ Informações: Título da API, descrição, versão, termos de uso, contato.
 Servidores: URL base da API no Apigee X.
 Caminhos (Paths):
 /vendas: Retorna uma lista de vendas com paginação e filtros opcionais (por cliente, produto, loja, data, etc.).
-/vendas/{id}: Retorna detalhes de uma venda específica pelo ID.
+/vendas/id: Retorna detalhes de uma venda específica pelo ID.
 /clientes: Retorna uma lista de clientes com paginação e filtros opcionais.
 /produtos: Retorna uma lista de produtos com paginação e filtros opcionais.
 /lojas: Retorna uma lista de lojas com paginação e filtros opcionais.
@@ -280,6 +289,7 @@ Fatos:
 
 Gere uma especificação OpenAPI 3.0 em formato YAML para uma API de consulta de dados de vendas no varejo e descreva os passos para criar um proxy no Apigee X usando a apigeecli.
 
+All the answers are required to be in {story_lang} and to stick to the persona. 
 Dados:
 """ + st.session_state["response"]
 

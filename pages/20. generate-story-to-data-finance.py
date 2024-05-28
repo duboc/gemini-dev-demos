@@ -62,6 +62,13 @@ length_of_story = st.radio(
     horizontal=True,
 )
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 prompt = f"""Write a {length_of_story} User story based on the following premise: \n
       persona_name: {persona_name} \n
       persona_type: {persona_type} \n
@@ -85,7 +92,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
                     [Event occurs]
             *   **Then**: \n
                     [Expected outcome]
-        Todas as respostas precisam estar em português e utilizar sempre a persona indicada. 
+All the answers are required to be in {story_lang}.
       """
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
@@ -103,7 +110,7 @@ if generate_t2t and prompt:
         
 
 
-promptTasks = """
+promptTasks = f"""All the answers are required to be in {story_lang}.
 Divida a história de usuário em tarefas o mais granular possível. 
 O objetivo de fragmentar uma história de usuário é criar uma lista de tarefas que possam ser concluídas dentro de um sprint. 
 Portanto, é importante dividir a história em tarefas mínimas que ainda agreguem valor ao usuário final. 
@@ -125,8 +132,8 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """Análise da User Story:
-
+promptSnippets = f"""Análise da User Story:
+All the answers are required to be in {story_lang}.
 Exemplo:
 User Story: "Como médico, quero poder acompanhar o histórico de consultas dos meus pacientes, incluindo datas, diagnósticos, procedimentos realizados e medicamentos prescritos."
 
@@ -204,8 +211,8 @@ if generate_python and promptSnippets:
         with first_tab2:
             st.text(promptSnippets)
 
-promptBigQuery = """
-
+promptBigQuery = f"""
+All the answers are required to be in {story_lang}.
 ## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Saúde)
 
 **Instruções para o Modelo:**

@@ -69,6 +69,13 @@ length_of_story = st.radio(
     horizontal=True,
 )
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 prompt = f"""Write a {length_of_story} User story based on the following premise: \n
       persona_name: {persona_name} \n
       persona_type: {persona_type} \n
@@ -92,7 +99,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
                     [Event occurs]
             *   **Then**: \n
                     [Expected outcome]
-        Todas as respostas precisam estar em português e utilizar sempre a persona indicada. 
+       All the answers are required to be in {story_lang} and to stick to the persona. 
       """
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
@@ -110,12 +117,13 @@ if generate_t2t and prompt:
         
 
 
-promptTasks = """
+promptTasks = f"""All the answers are required to be in {story_lang} and to stick to the persona. 
 Divida a história de usuário em tarefas o mais granular possível. 
 O objetivo de fragmentar uma história de usuário é criar uma lista de tarefas que possam ser concluídas dentro de um sprint. 
 Portanto, é importante dividir a história em tarefas mínimas que ainda agreguem valor ao usuário final. 
 Isso facilita o acompanhamento do progresso e garante que a equipe se mantenha no caminho certo.
 Crie uma tabela com as tasks como índice da tabela com a descrição da task. 
+       All the answers are required to be in {story_lang} and to stick to the persona. 
 """ + st.session_state["response"]
 
 st.divider()
@@ -132,7 +140,7 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """Análise da User Story:
+promptSnippets = f"""Análise da User Story:
 
 Exemplo:
 User Story: "Como médico, quero poder acompanhar o histórico de consultas dos meus pacientes, incluindo datas, diagnósticos, procedimentos realizados e medicamentos prescritos."
@@ -195,6 +203,7 @@ Inclua exemplos de dados que poderiam ser inseridos na tabela DW, com base nas t
 Sempre ao gerar dados mock, utilize algum nome da seguinte lista:
 Breno, Amadei, Carlos, Mazurque, Kauy, Filipe, Renato, Wilgner, Rober, Diego, Iago, Tiago, Brunno, Koba
 Utilize o dados abaixo como entrada. 
+       All the answers are required to be in {story_lang} and to stick to the persona. 
 """ + st.session_state["response"]
 
 st.divider()
@@ -211,7 +220,7 @@ if generate_python and promptSnippets:
         with first_tab2:
             st.text(promptSnippets)
 
-promptBigQuery = """
+promptBigQuery = f"""
 
 ## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Varejo)
 
@@ -288,6 +297,7 @@ Fatos:
 
 Crie as tabelas no BigQuery e gere os comandos SQL necessários.
 ```
+       All the answers are required to be in {story_lang} and to stick to the persona. 
 Dados:
 """ + st.session_state["response"]
 

@@ -69,6 +69,13 @@ length_of_story = st.radio(
     horizontal=True,
 )
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 prompt = f"""Write a {length_of_story} User story based on the following premise: \n
       persona_name: {persona_name} \n
       persona_type: {persona_type} \n
@@ -92,7 +99,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
                     [Event occurs]
             *   **Then**: \n
                     [Expected outcome]
-        Todas as respostas precisam estar em português e utilizar sempre a persona indicada. 
+All the answers are required to be in {story_lang}.
       """
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
@@ -110,7 +117,7 @@ if generate_t2t and prompt:
         
 
 
-promptTasks = """
+promptTasks = f"""All the answers are required to be in {story_lang}.
 Divida a história de usuário em tarefas o mais granular possível. 
 O objetivo de fragmentar uma história de usuário é criar uma lista de tarefas que possam ser concluídas dentro de um sprint. 
 Portanto, é importante dividir a história em tarefas mínimas que ainda agreguem valor ao usuário final. 
@@ -132,7 +139,7 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """A partir da lista de tasks, crie snippets de ADVPL para implementar a funcionalidade para a primeira task da lista.
+promptSnippets = f"""A partir da lista de tasks, crie snippets de ADVPL para implementar a funcionalidade para a primeira task da lista.
 Identifique restrições ou requisitos específicos que impactam a implementação:
 Limitações de tempo ou recursos
 Compatibilidade com APIs ou bibliotecas externas
@@ -151,7 +158,7 @@ Teste e Validação:
 - Verificação de erros e exceções
 - Validação da correção dos resultados
 - Assegure a confiabilidade e robustez do código gerado.
-
+All the answers are required to be in {story_lang}.
 Crie o código somente para a primeira task. Faça uma ordem numerada onde o primeiro numero é o nome da task, o segundo é um sumário do código e depois coloque o snippet gerado e quantas novos itens precisar para complementar com a informação requerida. 
 """ + st.session_state["response"]
 

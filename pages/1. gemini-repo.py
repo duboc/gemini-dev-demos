@@ -103,6 +103,13 @@ st.markdown(
     """
 )
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 repo_dir = "./repo"
 
 st.subheader("Preparar dados", divider="blue")

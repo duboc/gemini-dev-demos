@@ -94,6 +94,13 @@ model_name = st.radio(
       index=0,
       horizontal=True)
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 text_model_pro, multimodal_model_pro = load_models(model_name)
 
 st.divider()
@@ -103,7 +110,8 @@ st.subheader("Image description", divider="blue")
 image1 = Part.from_uri(
     mime_type="image/png",
     uri="gs://convento-samples/tela-login.png")
-prompt = """Explique essa tela de login no formato de plano de teste para uma história de usuário. \n
+prompt = f""" All the answers should be provided in {story_lang}
+            Explique essa tela de login no formato de plano de teste para uma história de usuário. \n
             Essa descrição vai ser utilizado para backlog de desenvolvimento."""
 
 
@@ -145,7 +153,8 @@ if generate_test_case:
     with st.spinner("Generating your test cases using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
-            promptTest = """Use o conteúdo da imagem mais a descrição gerada para criar um test case para um sprint que está sendo planejado
+            promptTest = f""" All the answers should be provided in {story_lang}
+            Use o conteúdo da imagem mais a descrição gerada para criar um test case para um sprint que está sendo planejado
             Descrição gerada: \n
             """ + "\n" + st.session_state["response"]
             if promptTest:
@@ -162,7 +171,8 @@ if generate_test_case_code:
     with st.spinner("Generating your test cases code using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
-            promptTestCode = """Use o conteúdo da imagem mais o plano de testes para criar scritps para testar durante o sprint planejado
+            promptTestCode = f""" All the answers should be provided in {story_lang}
+            Use o conteúdo da imagem mais o plano de testes para criar scritps para testar durante o sprint planejado
             Teste plan gerado: \n
             """ + "\n" + st.session_state["response"]
             if promptTestCode:
@@ -179,7 +189,8 @@ if generate_selenium:
     with st.spinner("Generating your test cases code using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
-            promptSelenium = """Use o conteúdo da imagem mais o plano de testes para criar um script selenium para automatizar os testes
+            promptSelenium = f""" All the answers should be provided in {story_lang}
+            Use o conteúdo da imagem mais o plano de testes para criar um script selenium para automatizar os testes
             Scripts gerados: \n
             """ + "\n" + st.session_state["response"]
             if promptSelenium:

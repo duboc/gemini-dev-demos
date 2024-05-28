@@ -25,6 +25,13 @@ st.info(
         "Isso é normal, pois estamos analisando e organizando todo o código para facilitar a busca e resposta às suas perguntas. 😊"
     )
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 st.subheader("Preparar dados", divider="blue")
 repo_url = st.text_input("Cole um repositório para ser analisado:", """https://github.com/GoogleCloudPlatform/microservices-demo""")
 
@@ -66,7 +73,7 @@ if st.button("Iniciar bot"):
 st.subheader("Chat")
 st.divider()
 
-template = """
+template = f""" All the conversation and answers should be in {story_lang}
 Initial context: Always think step by step.
 The conversation interface is a chat tool acting a code generation using as a codebase for rag. Be concise and polite. 
 Your mission is to answer all code related questions with given context and instructions. 

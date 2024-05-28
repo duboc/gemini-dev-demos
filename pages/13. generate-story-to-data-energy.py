@@ -44,6 +44,7 @@ persona_type = st.text_input(
 
 user_story = st.selectbox ('Selecione um tema:', [
 			'[Consumo] Como cliente, quero visualizar meu histórico de consumo de energia para entender meus padrões de uso.',
+            '[Troca] Como cliente, quero trocar minha titularidade da conta de energia',
 			'[Alertas] Como cliente, quero receber alertas sobre interrupções de energia programadas para me planejar.',
 			'[Adesão] Como cliente, quero solicitar um novo ponto de fornecimento de energia de forma rápida e fácil.',
 			'[Portal] Como cliente, quero acessar um portal online para gerenciar minha conta de energia e realizar pagamentos.',
@@ -60,6 +61,13 @@ length_of_story = st.radio(
     "Select the length of the story: \n\n",
     ["Short", "Long"],
     key="length_of_story",
+    horizontal=True,
+)
+
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
     horizontal=True,
 )
 
@@ -86,7 +94,7 @@ prompt = f"""Write a {length_of_story} User story based on the following premise
                     [Event occurs]
             *   **Then**: \n
                     [Expected outcome]
-        Todas as respostas precisam estar em português e utilizar sempre a persona indicada. 
+All the answers are required to be in {story_lang} and to stick to the persona. 
       """
 
 generate_t2t = st.button("Generate my story", key="generate_t2t")
@@ -104,7 +112,7 @@ if generate_t2t and prompt:
         
 
 
-promptTasks = """
+promptTasks = f"""All the answers are required to be in {story_lang} and to stick to the persona. 
 Divida a história de usuário em tarefas o mais granular possível. 
 O objetivo de fragmentar uma história de usuário é criar uma lista de tarefas que possam ser concluídas dentro de um sprint. 
 Portanto, é importante dividir a história em tarefas mínimas que ainda agreguem valor ao usuário final. 
@@ -126,7 +134,7 @@ if generate_Tasks and promptTasks:
         with first_tab2:
             st.text(promptTasks)
 
-promptSnippets = """Análise da User Story:
+promptSnippets = f"""Análise da User Story:
 
 Exemplo:
 User Story: "Como médico, quero poder acompanhar o histórico de consultas dos meus pacientes, incluindo datas, diagnósticos, procedimentos realizados e medicamentos prescritos."
@@ -189,6 +197,7 @@ Inclua exemplos de dados que poderiam ser inseridos na tabela DW, com base nas t
 Sempre ao gerar dados mock, utilize algum nome da seguinte lista:
 Breno, Amadei, Carlos, Mazurque, Kauy, Filipe, Renato, Wilgner, Rober, Diego, Iago, Tiago, Brunno, Koba
 Utilize o dados abaixo como entrada. 
+All the answers are required to be in {story_lang}.
 """ + st.session_state["response"]
 
 st.divider()
@@ -205,8 +214,8 @@ if generate_python and promptSnippets:
         with first_tab2:
             st.text(promptSnippets)
 
-promptBigQuery = """
-
+promptBigQuery = f"""
+All the answers are required to be in {story_lang}.
 ## Prompt para Criação de Tabela DW no BigQuery a Partir de Sugestão (Energia - Consumidor Final)
 
 **Instruções para o Modelo:**

@@ -94,6 +94,13 @@ model_name = st.radio(
       index=0,
       horizontal=True)
 
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
+
 text_model_pro, multimodal_model_pro = load_models(model_name)
 
 st.divider()
@@ -103,8 +110,11 @@ st.subheader("Image description", divider="blue")
 image1 = Part.from_uri(
     mime_type="image/png",
     uri="gs://convento-samples/tela-login.png")
-prompt = """Explique essa tela de login no formato de implementação de features para uma história de usuário. \n
-            Essa descrição vai ser utilizado para backlog de desenvolvimento para criação de frontend, backend e o plano de deploy no Google CLoud."""
+prompt = f""" 
+            Explique essa tela de login no formato de implementação de features para uma história de usuário. \n
+            Essa descrição vai ser utilizado para backlog de desenvolvimento para criação de frontend, backend e o plano de deploy no Google CLoud.
+            All the answers should be provided in {story_lang}
+            """
 
 
 st.markdown( """Gemini Pro can provide a description for any media""" )
@@ -145,7 +155,8 @@ if generate_backend:
     with st.spinner("Generating your backend code using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
-            promptBackend = """Use o conteúdo da imagem mais a descrição gerada para criar uma implementação de backend utilizando flask e python para um sprint que está sendo planejado
+            promptBackend = f""" All the answers should be provided in {story_lang}
+            Use o conteúdo da imagem mais a descrição gerada para criar uma implementação de backend utilizando flask e python para um sprint que está sendo planejado
             Descrição gerada: \n
             """ + "\n" + st.session_state["response"]
             if promptBackend:
@@ -163,7 +174,8 @@ if generate_frontend:
     with st.spinner("Generating your frontend code using Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
-            promptFrontend = """Use o conteúdo da imagem mais o código do backend para melhorar implementar o frontend para a aplicação
+            promptFrontend = f""" All the answers should be provided in {story_lang}
+            Use o conteúdo da imagem mais o código do backend para melhorar implementar o frontend para a aplicação
             Código Backend gerado: \n
             """ + "\n" + st.session_state["backend"]
             if promptFrontend:
@@ -181,7 +193,8 @@ if generate_gcloud:
     with st.spinner("Generating your Google Cloud scripts Gemini..."):
         first_tab1, first_tab2= st.tabs(["Code", "Prompt"])
         with first_tab1:
-            promptGcloud = """Use o conteúdo do backend e frontend para criar a melhor arquitetura de deploy para uma aplicação stateless. \n
+            promptGcloud = f""" All the answers should be provided in {story_lang}
+            Use o conteúdo do backend e frontend para criar a melhor arquitetura de deploy para uma aplicação stateless. \n
             Utilize cloud run e algum banco de dados e escolha o mais apropriado baseado no código, e utilize o google cloud storage para guardar possíveis imagens. \n 
             O output precisa ser um terraform dentro das melhores práticas: \n
             """ + "\n" + st.session_state["response"] + "\n" + st.session_state["backend"] + "\n" + st.session_state["frontend"]

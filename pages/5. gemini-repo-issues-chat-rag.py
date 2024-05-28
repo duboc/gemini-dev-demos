@@ -31,6 +31,12 @@ How It Works
 - Natural Language Chat: Simply type your question in plain English (or any supported language), and the chatbot will instantly provide a concise, focused answer, pinpointing the exact issue where the information is found.
 
 """)
+story_lang = st.radio(
+    "Select the language to be used for the story generation: \n\n",
+    ["Portuguese", "Spanish", "English"],
+    key="story_lang",
+    horizontal=True,
+)
 st.subheader("Github Setup", divider="blue")
 repo = st.text_input("Digite um repositório do gitub no formato repo/name. Repo: ", "GoogleCloudPlatform/microservices-demo")
 
@@ -82,7 +88,7 @@ st.subheader("Start conversation", divider="green")
 st.subheader("Chat")
 
 
-template = """
+template = f""" All the conversation should be in {story_lang}
 Answer: Let's think step by step.
 The conversation interface is a chat tool. Be concise and polite. 
 Always reply in table and always add the issue name as the index"""
