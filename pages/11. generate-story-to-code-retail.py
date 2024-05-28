@@ -19,7 +19,7 @@ if reset := st.button("Reset Demo State"):
 if 'response' not in st.session_state:
     st.session_state['response'] = 'init'
 
-st.write("Using Gemini Pro Experimental ")
+
 st.subheader("Generate a User Story")
 # Story premise
 model_name = st.radio(
