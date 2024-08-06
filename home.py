@@ -1,78 +1,98 @@
 import streamlit as st
-import utils_streamlit
+import importlib.util
+import os
 
-st.set_page_config(page_title="Generative AI Demos", page_icon="./images/logo.png")
+# Override Streamlit's default page config
+st.set_page_config(
+    page_title="Generative AI Demos",
+    page_icon="./images/logo.png",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Use st.columns for better layout and visual appeal
-col1, col2 = st.columns([1, 3])  
-
-with col1:
-    st.image("./images/logo.png", width=100) 
-
-with col2:
-    st.title("Generative AI Developer Demos")
-
-st.divider()
-
-reset = st.button("Reset Demo State")
-if reset:
-    utils_streamlit.reset_st_state()
-
-# Introduction to the demos
-st.write("""
-Welcome to the Generative AI Demos! This app showcases the capabilities of Google's Gemini family of models in various software development tasks.
-
-Select a demo from the left sidebar menu to get started. 
-""")
-
-st.subheader("Demo Descriptions:")
-
-# Use markdown for better formatting and readability
+# Hide default Streamlit elements and remove extra top padding
 st.markdown("""
-**1. Gemini Repo Inspection:**
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .reportview-container .main .block-container {padding-top: 0rem;}
+        .sidebar .sidebar-content {
+            background-image: linear-gradient(#2e7bcf,#2e7bcf);
+            color: white;
+        }
+        .sidebar .sidebar-content [aria-selected="true"] {
+            background-color: #0056b3;
+            font-weight: bold; 
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-*   Analyzes a given GitHub repository using the Gemini Pro Experimental model.
-*   Clones the repository, indexes the code, and allows you to ask questions related to the codebase.
-*   The whole codebase is then inserted into the context to provide comprehensive answers based on the repository's code. 
+st.title("Generative AI Developer Demos")
+st.write("Select a demo category from the sidebar to get started.")
 
-**2. Code Chat with RAG:**
+# Define the demo pages
+demo_pages = {
+    "🤖 Code Intelligence": [
+        {"title": "Repo Inspection", "path": "apps/repo-inspection.py"},
+        {"title": "Image to Code, Test and Deploy", "path": "apps/code-to-image.py"},
+        {"title": "Cobol to Java", "path": "apps/cobol-to-java.py"},
+    ],
+    "🐛 Test Automation": [
+        {"title": "Selenium Automation", "path": "apps/selenium-automation.py"},
+        {"title": "Firebase Robo Script", "path": "apps/firebase-testlab.py"},
+        {"title": "Appium Automation", "path": "apps/appium-automation.py"},
+    ],
+    "🎨 UX/UI Design": [
+        {"title": "UX Heuristic Analysis using Gemini AI", "path": "apps/ux-heuristics-app.py"},
+        {"title": "UX Friction Log Generator", "path": "apps/ux-frictionlog-app.py"},
+        {"title": "Accessibility with Gemini", "path": "apps/ux-accessibility.py"},
+    ],
+    "📝 User Story Automation": [
+        {"title": "User Story to Code", "path": "apps/generate-story-to-code-generic.py"},
+        {"title": "User Story to Data", "path": "apps/generate-story-to-data-generic.py"},
+        {"title": "User Story to API", "path": "apps/generate-story-to-api-generic.py"},
+    ],
+    "🌍 Others": [
+        {"title": "Dataform Generation", "path": "apps/dataform-gen.py"},
+    ],
+}
 
-*   Provides a conversational chat interface powered by Gemini Pro Experimental and RAG to interact with a GitHub repository.
-*   Answers code-related questions, provides insights into the repository's functionality, and requests more context if needed.
+# Initialize session state
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = None
+if 'selected_category' not in st.session_state:
+    st.session_state.selected_category = list(demo_pages.keys())[0]
 
-**3. Github Issues Chat with RAG:**
+# Custom sidebar
+st.sidebar.title("Demo Categories")
 
-*   Focuses on understanding and answering questions related to GitHub issues.
-*   Uses the `GitHubIssuesLoader` to retrieve issues and leverages Gemini Pro Experimental and RAG to answer your queries.
+# Radio buttons for categories
+selected_category = st.sidebar.radio(
+    "Select a category:",
+    options=list(demo_pages.keys()),
+    key="selected_category"
+)
 
-**4. Gemini User Story Generator:**
+st.sidebar.title("Demos")
+for page in demo_pages[st.session_state.selected_category]:
+    if st.sidebar.button(page["title"]):
+        st.session_state.current_page = page["path"]
+        st.rerun()
 
-*   Generates User Stories based on your input using the Gemini Pro Experimental model.
-*   Choose from predefined prompts or provide your own brief description for a customized user story.
+st.sidebar.markdown("---")
+st.sidebar.info("If you encounter a state error, click the 'Reset All' button below.")
+if st.sidebar.button("Reset All"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 
-**5. Gemini Repo to Multimodal Tasks:**
-
-*   Showcases the power of Gemini Pro 1.5, 1.5 Flash, and Experimental models in generating a user story, breaking it down into tasks, and creating Python code snippets.
-*   Select the model you want to use with a radio button.
-
-**6. Sprint Planning from Image:**
-
-*   Combines Gemini Pro Experimental and Gemini Pro Vision to generate a sprint plan from an application interface screenshot.
-*   Generates a detailed description, breaks it down into backend and frontend tasks, and even creates a Terraform script for deployment on Google Cloud.
-
-**7. Gemini Selenium Task from Video:**
-
-*   Automates tasks based on video input using Gemini Pro Vision.
-*   Analyzes user interactions in a web browser video, generates a timestamped list of actions, and creates a Selenium script to automate the showcased task.
-
-**8. Gemini User Story to Code:**
-
-*   Provides a comprehensive approach to moving from User Story to code using Gemini Pro Vision.
-*   Analyzes the user story, identifies backend and frontend tasks, suggests suitable Google Cloud services, and generates Terraform code for deployment.
-            
-**9. Test Plan from Image:**
-
-*   Leverages Gemini Pro Experimental and Gemini Pro Vision to create test plans based on an application screenshot.
-*   Generates a description, test plan, test scripts, and even Selenium scripts for automated testing.
-
-""")
+# Load the selected demo page
+if st.session_state.current_page:
+    page_path = st.session_state.current_page
+    page_name = os.path.splitext(os.path.basename(page_path))[0]
+    
+    spec = importlib.util.spec_from_file_location(page_name, page_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+else:
+    st.write("Please select a demo from the sidebar to get started.")
