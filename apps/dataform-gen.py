@@ -257,9 +257,10 @@ if st.button("Generate Terraform"):
     else:
         with st.spinner("Generating Terraform..."):
             terraform_prompt = f"""
-            Generate a Terraform code to facilitate a deploy in Bigquery using the following Dataform SQL: \
+            Create two bash scripts. One to get the output from the {st.session_state.dataform_sql} and transform this as an input for the next bash
+            Now generate a bash with gcloud code to facilitate a deploy in Bigquery using the following Dataform SQL: \
             {st.session_state.dataform_sql} \
-            Use the following variables provided by the user in your Terraform code: \
+            Use the following variables provided by the user in your gcloud code: \
             - Dataform Workspace Name: {dataform_workspace_id} \
             - Google Cloud Project ID:{dataform_project_id} \
             - Dataform Name: {dataform_action_name} \
@@ -267,8 +268,27 @@ if st.button("Generate Terraform"):
             - Bigquery Table Name: {bigquery_table} \
             * Please include a table creation in Bigquery to match the Dataform SQL generated code \
 
+        
+            Use only the following reference for the dataform cli generation
+
+            Dataform CLI commands
+                The open-source Dataform CLI provides commands to initialize, compile, test, and run Dataform core locally, outside of Google Cloud.
+
+                Dataform CLI command	Description
+                dataform help	Shows help for all Dataform CLI commands.
+                dataform help [command]	Shows help for the specified command.
+                dataform init [project-dir]	Creates a new Dataform project.
+                dataform install [project-dir]	Installs NPM dependencies for the specified Dataform project.
+                dataform init-creds [project-dir]	Creates a .df-credentials.json file for Dataform to use when accessing Google Cloud APIs.
+                dataform compile [project-dir]	Compiles the specified Dataform project. Produces JSON output describing the non-executable graph.
+                dataform test [project-dir]	Runs the specified Dataform project's unit tests on BigQuery.
+                dataform run [project-dir]	Runs the specified Dataform project's scripts on BigQuery.
+                dataform format [project-dir]	Formats the specified Dataform project's files.
+                --help	Shows help [boolean].
+                --version	Shows the version number of the Dataform CLI [boolean].
             
             """
+            print(terraform_prompt)
             terraform_response = vertex.sendPrompt(terraform_prompt, vertex.model_gemini_pro)
 
             if terraform_response:
