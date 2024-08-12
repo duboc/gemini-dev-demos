@@ -4,7 +4,7 @@ import os
 
 # Override Streamlit's default page config
 st.set_page_config(
-    page_title="Generative AI Demos",
+    page_title="Generative AI Demos ✨",
     page_icon="./images/logo.png",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -27,8 +27,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Generative AI Developer Demos")
-st.write("Select a demo category from the sidebar to get started.")
+st.title("Generative AI Developer Demos ✨")
+left_co, cent_co,last_co = st.columns(3)
+with cent_co:
+    st.image("images/gemini_gif.gif")
+st.subheader("🤖 **Unleash the Power of Gemini: Revolutionize Your Software Development**")
+st.markdown(
+    """
+    This is your gateway to the future of AI-powered software development. Built with Streamlit 🎈, this interactive showcase demonstrates how Google's groundbreaking Gemini AI 
+    models can transform your workflow.
+"""
+)
+
+
+st.subheader("👈 Select a demo category from the sidebar to get started.")
+
+
 
 # Define the demo pages
 demo_pages = {
@@ -52,8 +66,8 @@ demo_pages = {
         {"title": "User Story to Data", "path": "apps/generate-story-to-data-generic.py"},
         {"title": "User Story to API", "path": "apps/generate-story-to-api-generic.py"},
     ],
-    "🌍 Others": [
-        {"title": "Dataform Generation", "path": "apps/dataform-gen.py"},
+    "📊 Data Analytics": [
+        {"title": "Dataform ELT Generation", "path": "apps/dataform-gen.py"},
     ],
 }
 
@@ -64,7 +78,9 @@ if 'selected_category' not in st.session_state:
     st.session_state.selected_category = list(demo_pages.keys())[0]
 
 # Custom sidebar
+st.sidebar.image("images/logo.png", width=50)
 st.sidebar.title("Demo Categories")
+
 
 # Radio buttons for categories
 selected_category = st.sidebar.radio(
