@@ -166,7 +166,7 @@ def generate_example_questions(schema):
 
     {schema}
 
-    Generate three insightful questions that a user might ask about their billing data. 
+    Generate three insightful questions that a user might ask about their billing data in Google Cloud. 
     The questions should be diverse and cover different aspects of the schema.
     Return only the questions, one per line, without any additional text or numbering.
     """
@@ -179,7 +179,15 @@ if 'dataform_sql' not in st.session_state:
 if 'example_questions' not in st.session_state:
     st.session_state.example_questions = []
 
-st.header("Dataform and Terraform Generator")
+st.header("Dataform ELT Generator :bar_chart:")
+st.markdown(" **Effortless BigQuery Table Deployment: Schema-to-SQLx-to-Terraform with Gemini**")
+st.markdown("Transform your ELT using BigQuery with table creation workflow with Gemini's AI-powered capabilities. \
+Simply provide your table schema, and Gemini will generate:")
+st.markdown("- SQLx Code: Precise Rust code using SQLx to efficiently implement your desired transformations \
+or data loading logic.")
+st.markdown("- Terraform Configuration: A ready-to-use Terraform file to create the \
+corresponding BigQuery table, complete with schema definition and data loading steps leveraging the generated SQLx code.")
+
 
 # Step 1: Schema Input
 st.subheader("Step 1: Enter Your Schema")
@@ -203,7 +211,7 @@ with st.expander("View/Edit Schema"):
 
 # Step 2: Custom Question Input and Dataform SQL Generation
 st.subheader("Step 2: Generate Dataform SQL")
-st.write("Example Questions:")
+st.write("Example Questions when using the Simple Billing Schema:")
 
 # Generate example questions only if they haven't been generated yet
 if not st.session_state.example_questions:
@@ -216,7 +224,15 @@ custom_question = st.text_input("Enter your question about the schema:")
 
 if st.button("Generate Dataform SQL"):
     with st.spinner("Generating Dataform SQL..."):
-        dataform_prompt = f"Generate Dataform SQL for the following question: {custom_question}"
+        dataform_prompt = f"Given the following table schema in JSON format: \n{schema} \
+        generate a SQLx query for Dataform to answer the question: {custom_question} \
+        generate a step-by-step guide to include the sqlx inside Dataform's paths i.e *definitions \
+        Make the following assumptions: \
+        * Assume that the user is trying to generate an ELT using the {schema} that is not stored in Bigquery yet \
+        * Generate a step by step guide to conver the {schema} that is in JSON, to a CSV to be stored in a Bigquery table \
+        * Assume that the only table the user has is the {schema}, so do not include any JOIN \
+        * If the question involves filtering by date or time, assume the relevant column exists in the table from the schema provided and is named 'date' or 'timestamp' (choose the most appropriate one based on the schema).    "  
+
         dataform_input = schema + "\n" + dataform_prompt
         st.session_state.dataform_sql = vertex.sendPrompt(dataform_input, vertex.model_gemini_pro)
 
@@ -229,8 +245,11 @@ st.subheader("Step 3: Generate Terraform")
 
 # Specific inputs for Terraform variables
 dataform_workspace_id = st.text_input("Dataform Workspace ID:")
-dataform_project_id = st.text_input("Dataform Project ID:")
-dataform_action_name = st.text_input("Dataform Action Name:")
+dataform_project_id = st.text_input("Project ID:")
+dataform_action_name = st.text_input("Dataform Name:")
+bigquery_dataset = st.text_input("Bigquery Dataset:")
+bigquery_table = st.text_input("Bigquery Table:")
+
 
 if st.button("Generate Terraform"):
     if not st.session_state.dataform_sql:
@@ -238,15 +257,38 @@ if st.button("Generate Terraform"):
     else:
         with st.spinner("Generating Terraform..."):
             terraform_prompt = f"""
-            Generate Terraform code to deploy the following Dataform SQL:
+            Create two bash scripts. One to get the output from the {st.session_state.dataform_sql} and transform this as an input for the next bash
+            Now generate a bash with gcloud code to facilitate a deploy in Bigquery using the following Dataform SQL: \
+            {st.session_state.dataform_sql} \
+            Use the following variables provided by the user in your gcloud code: \
+            - Dataform Workspace Name: {dataform_workspace_id} \
+            - Google Cloud Project ID:{dataform_project_id} \
+            - Dataform Name: {dataform_action_name} \
+            - Bigquery Dataset Name: {bigquery_dataset} \
+            - Bigquery Table Name: {bigquery_table} \
+            * Please include a table creation in Bigquery to match the Dataform SQL generated code \
 
-            {st.session_state.dataform_sql}
+        
+            Use only the following reference for the dataform cli generation
 
-            Use the following variables in your Terraform code:
-            - dataform_workspace_id: {dataform_workspace_id}
-            - dataform_project_id: {dataform_project_id}
-            - dataform_action_name: {dataform_action_name}
+            Dataform CLI commands
+                The open-source Dataform CLI provides commands to initialize, compile, test, and run Dataform core locally, outside of Google Cloud.
+
+                Dataform CLI command	Description
+                dataform help	Shows help for all Dataform CLI commands.
+                dataform help [command]	Shows help for the specified command.
+                dataform init [project-dir]	Creates a new Dataform project.
+                dataform install [project-dir]	Installs NPM dependencies for the specified Dataform project.
+                dataform init-creds [project-dir]	Creates a .df-credentials.json file for Dataform to use when accessing Google Cloud APIs.
+                dataform compile [project-dir]	Compiles the specified Dataform project. Produces JSON output describing the non-executable graph.
+                dataform test [project-dir]	Runs the specified Dataform project's unit tests on BigQuery.
+                dataform run [project-dir]	Runs the specified Dataform project's scripts on BigQuery.
+                dataform format [project-dir]	Formats the specified Dataform project's files.
+                --help	Shows help [boolean].
+                --version	Shows the version number of the Dataform CLI [boolean].
+            
             """
+            print(terraform_prompt)
             terraform_response = vertex.sendPrompt(terraform_prompt, vertex.model_gemini_pro)
 
             if terraform_response:
