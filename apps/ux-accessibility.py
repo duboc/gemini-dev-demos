@@ -85,7 +85,7 @@ with col1:
     text_model_pro, multimodal_model_pro = load_models(model_name)
 
     if use_case == "Retail (Nike)":
-        video_uri = "gs://convento-samples/nike-sbf.mp4"
+        video_uri = "gs://my-demo-project-samples/nike-sbf.mp4"
     else:
         video_uri = "gs://convento-samples/raia.mp4"
 

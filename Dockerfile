@@ -9,6 +9,8 @@ COPY . .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY index.html /usr/local/lib/python3.12/site-packages/streamlit/static/index.html
+
 # Set environment variables (replace with your values)
 ENV GCP_PROJECT=my-demo-project-400313
 ENV GCP_REGION=us-central1
