@@ -47,8 +47,8 @@ model = GenerativeModel(MODEL_ID, safety_settings=safety_settings)
 def stream_prompt(input):
     token_size = model.count_tokens(input)
     total_tokens = int(re.search(r"total_tokens:\s*(\d+)", str(token_size)).group(1))
-    if total_tokens > 1000000:
-        raise ValueError("Total tokens must be less than 1000000")
+    if total_tokens > 2000000:
+        raise ValueError("Total tokens must be less than 2000000")
 
     billable_characters = int(re.search(r"total_billable_characters:\s*(\d+)", str(token_size)).group(1))
     cost = (billable_characters / 1000) * 0.0025

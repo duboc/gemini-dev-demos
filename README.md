@@ -1,48 +1,136 @@
-# Gemini-Dev-Demos
+# Generative AI = Developer Lifecyle Demos ✨
 
-This application showcases the capabilities of Google's Gemini AI models in various software development tasks. Built using Streamlit, it offers interactive demos that highlight Gemini's potential for code analysis, test plan generation, user story creation, and code snippet generation, leveraging advanced techniques like Retrieval Augmented Generation (RAG) and multimodal processing.
+<center>
+<img src="images/gemini_gif.gif" alt="Gemini Gif" width="250" height="250">
+</center>
 
-Live demo:
-https://genai-re-demos-nhgqlpa4za-uc.a.run.app
+This repository showcases a suite of interactive demos leveraging Google's Gemini AI models to revolutionize software development workflows. Built with Streamlit, these demos cover various aspects of the development lifecycle, providing practical examples of AI-assisted software engineering.
 
+## 🚀 Features
 
-## Demo Highlights
+- **Code Intelligence**: Repo inspection, image-to-code generation, and legacy code migration.
+- **Test Automation**: Selenium, Firebase Robo Script, and Appium automation.
+- **UX/UI Design**: Heuristic analysis, friction log generation, and accessibility testing.
+- **User Story Automation**: Generating code, data models, and APIs from user stories.
+- **DataOps**: Dataform ELT generation.
 
-- **Gemini Repo Inspection:** Analyze a GitHub repository, ask code-related questions, and get comprehensive answers based on the repository's code.
-- **Code Chat with RAG:** Engage in a conversational chat interface to explore a codebase and get insights into its functionality.
-- **Github Issues Chat with RAG:**  Ask questions about issues in a GitHub repository and get answers based on the issue content.
-- **Gemini User Story Generator:** Generate detailed User Stories based on your prompts or descriptions.
-- **Gemini Repo to Multimodal Tasks:** Generate a user story, break it down into tasks, and create Python code snippets for implementation. 
-- **Sprint Planning from Image:** Generate a sprint plan, including backend and frontend tasks and a Terraform deployment script, from an application screenshot.
-- **Gemini Selenium Task from Video:** Analyze a video of web browser interactions and generate a Selenium script to automate the task. 
-- **Test Plan from Image:** Create a comprehensive test plan, including test cases and Selenium scripts, from an application screenshot.
-- **Gemini User Story to Code:** Move from User Story to a code implementation plan, including suggested Google Cloud services and Terraform code. 
+## 🛠 Setup
 
-## How to Use
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/generative-ai-demos.git
+   cd generative-ai-demos
+   ```
 
-### Prerequisites:
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-1. **Google Cloud Project:** You'll need a Google Cloud Project with billing enabled.
-2. **Vertex AI API Enabled:** Enable the Vertex AI API in your project.
-3. **Service Account:** Create a Service Account with the necessary permissions for Vertex AI and (if needed) other Google Cloud services used in the demos (e.g., Secret Manager). 
-4. **Environment Variables:**  Set the following environment variables:
-    * `GCP_PROJECT`: Your Google Cloud Project ID
-    * `GCP_REGION`: Your preferred Google Cloud Region (e.g., 'us-central1')
+3. **Set up Google Cloud Project:**
+   - Create or select a project in the [Google Cloud Console](https://console.cloud.google.com/).
+   - Enable required APIs: Vertex AI, Cloud Run, Cloud Build, Artifact Registry, IAM, and Cloud Storage.
+   - Create a service account with necessary permissions and download the JSON key file.
 
-### Installation:
+4. **Configure environment variables:**
+   ```bash
+   export GCP_PROJECT="your-project-id"
+   export GCP_REGION="your-preferred-region"
+   export GOOGLE_APPLICATION_CREDENTIALS="path/to/your/service-account-key.json"
+   ```
 
-1. **Clone the repository:**  `git clone https://github.com/GoogleCloudPlatform/gemini-dev-demos.git`
-2. **Navigate to the directory:** `cd gemini-dev-demos`
-3. **Install dependencies:** `pip install -r requirements.txt`
+## 🚀 Running the Demos
 
-### Running the app:
+To run the demos locally:
 
-1. **Start the Streamlit app:**  `streamlit run home.py`
-2. **Access the demos:** Select the desired demo from the sidebar menu.
-3. **Interact with the demos:** Follow the instructions on each demo page to provide input and generate results.
+```bash
+streamlit run home.py
+```
 
-## Notes:
+This will start the Streamlit server and open the home page in your default web browser. Navigate through the sidebar to explore different demo categories and individual demos.
 
-- Ensure your Service Account has the necessary roles/permissions to access the APIs used in the demos (e.g., Gemini, Text Embedding, etc.). 
-- Some demos may require additional setup (e.g., creating a GitHub personal access token for accessing repositories).  The demo page will provide instructions for such cases.
-- Use the "Reset Demo State" button on the home page or individual demo pages to clear the session state and start fresh. 
+## 🐳 Docker Support
+
+A Dockerfile is provided for containerizing the application. To build and run the Docker container:
+
+1. Build the Docker image:
+   ```bash
+   docker build -t generative-ai-demos .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 8080:8080 -e GCP_PROJECT=your-project-id -e GCP_REGION=your-region generative-ai-demos
+   ```
+
+Access the application at `http://localhost:8080` in your web browser.
+
+## ☁️ Deployment with Cloud Build
+
+This project includes a `cloudbuild.yaml` file for automated builds and deployments using Google Cloud Build. Here's how to use it:
+
+1. **Set up Artifact Registry:**
+   Create a Docker repository in Artifact Registry:
+   ```bash
+   gcloud artifacts repositories create dev-lifecycle --repository-format=docker --location=us-central1 --description="Gemini Developer Lifecycle Demo"
+   ```
+
+2. **Trigger a build:**
+   Submit a build to Cloud Build:
+   ```bash
+   gcloud builds submit . --config=./cloudbuild.yaml --substitutions SHORT_SHA=1.0
+   ```
+
+3. **Customizing the build:**
+   The `cloudbuild.yaml` file defines the following steps:
+   - Install Python dependencies
+   - Build a Docker image
+   - Push the image to Artifact Registry
+   - Deploy the image to Cloud Run
+
+   You can customize the build by modifying the `cloudbuild.yaml` file. Key substitution variables include:
+   - `_ARTIFACT_REGISTRY_REPO`: Name of your Artifact Registry repository
+   - `_REPO_LOCATION`: Location of your Artifact Registry
+   - `_SERVICE_NAME`: Name of your Cloud Run service
+   - `_SERVICE_REGION`: Region for your Cloud Run service
+
+4. **Environment Variables:**
+   The Cloud Run deployment step sets the following environment variables:
+   - `GCP_PROJECT`: Set to your project ID
+   - `GCP_REGION`: Set to the specified service region
+
+Ensure you have the necessary permissions in your Google Cloud project to use Cloud Build, Artifact Registry, and Cloud Run.
+
+## 🔧 Troubleshooting
+
+- **API Errors**: Ensure your Google Cloud Project has the necessary APIs enabled and your service account has appropriate permissions.
+- **Model Unavailable**: Check if the selected Gemini model is available in your region. Some models may have limited availability.
+- **Memory Issues**: If encountering out-of-memory errors, try running the demos on a machine with more RAM or reduce the input size for large repositories or videos.
+- **Docker Issues**: Make sure Docker is installed and running on your system. Check Docker logs for any error messages.
+- **Cloud Build Issues**: Verify that you have the correct permissions and that all required APIs are enabled in your Google Cloud project.
+
+## 🤝 Contributing
+
+We welcome contributions to improve and expand these demos! Please refer to our [Contribution Guidelines](docs/CONTRIBUTING.md) for detailed information on how to contribute to this project.
+
+## 🔒 Security
+
+This project uses Google Cloud services. Ensure that you follow best practices for securing your Google Cloud environment:
+
+- Use the principle of least privilege when setting up service accounts.
+- Regularly rotate service account keys.
+- Keep your `GOOGLE_APPLICATION_CREDENTIALS` secure and never commit them to version control.
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgements
+
+- Google Cloud Platform and the Gemini AI team for their cutting-edge AI models
+- Streamlit for their excellent framework for building interactive data applications
+- The open-source community for various libraries and tools used in this project
+
+---
+
+For questions, issues, or feature requests, please open an issue in the GitHub repository or contact the maintainers.

@@ -22,11 +22,11 @@ steps:
            '--allow-unauthenticated']
 
 substitutions:
-  _ARTIFACT_REGISTRY_REPO: gemini-re-demos
+  _ARTIFACT_REGISTRY_REPO: dev-lifecycle
   _REPO_LOCATION: us-central1
-  _SERVICE_NAME: genai-re-demos
+  _SERVICE_NAME: dev-lifecycle
   _SERVICE_REGION: us-central1
 
-# gcloud artifacts repositories create gemini-re-demos --repository-format=docker --location=us-central1 --description="Gemini Dev Demos"
+# gcloud artifacts repositories create dev-lifecycle --repository-format=docker --location=us-central1 --description="Gemini Developer Lifecycle Demo"
 # gcloud builds submit . --config=./cloudbuild.yaml --substitutions SHORT_SHA=1.0
 

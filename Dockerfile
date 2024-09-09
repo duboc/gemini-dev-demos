@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.12
 
 # Set working directory
 WORKDIR /app
@@ -9,12 +9,11 @@ COPY . .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY index.html /usr/local/lib/python3.12/site-packages/streamlit/static/index.html
-
 # Set environment variables (replace with your values)
-ENV GCP_PROJECT=my-demo-project-400313
+ENV GCP_PROJECT=your-project-id
 ENV GCP_REGION=us-central1
 ENV STREAMLIT_SERVER_ENABLE_STATIC_SERVING=true
+ENV DEMO_ASSETS_BUCKET=bucket-name
 EXPOSE 8080
 
 # Run Streamlit app
