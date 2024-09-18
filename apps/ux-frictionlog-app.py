@@ -115,7 +115,7 @@ with col2:
     
     use_case = st.selectbox(
         "Select use case:",
-        ["E-commerce (Nike)", "Pharmacy (Raia)", "Healthcare"],
+        ["Bank of Anthos", "Hipster Shop"],
         key="use_case"
     )
 
@@ -124,9 +124,8 @@ load_vertex(model_region)
 text_model_pro, multimodal_model_pro = load_models(model_name)
 
 video_uris = {
-    "E-commerce (Nike)": "gs://convento-samples/nike-sbf.mp4",
-    "Pharmacy (Raia)": "gs://convento-samples/raia.mp4",
-    "Healthcare": "gs://convento-samples/friction-log.mp4"
+    "Bank of Anthos": "gs://convento-samples/boa-mobile.mp4",
+    "Hipster Shop": "gs://convento-samples/hipster-mobile.mp4"
 }
 
 selected_video_uri = video_uris[use_case]
@@ -147,6 +146,8 @@ Focus on the following key areas:
 2. Interaction Design (Usability and Responsiveness)
 3. Information Architecture (Findability and Organization)
 4. Visual Design (Aesthetics and Branding)
+5. If it's a banking app, focus on banking specific requirements
+6. If it's a retailer app, focus on mobile for retail
 
 Deliverable:
 

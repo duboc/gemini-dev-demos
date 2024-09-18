@@ -15,7 +15,6 @@ def load_models(name):
     return text_model_pro, multimodal_model_pro
 
 video_uris = {
-    "E-commerce (Nike)": "gs://convento-samples/nike-sbf.mp4",
-    "Pharmacy (Raia)": "gs://convento-samples/raia.mp4",
-    "Healthcare": "gs://convento-samples/friction-log.mp4"
+    "Bank of Anthos": "gs://convento-samples/boa-mobile.mp4",
+    "Hipster Shop": "gs://convento-samples/hipster-mobile.mp4"
 }

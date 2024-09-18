@@ -78,16 +78,16 @@ with col1:
 
     use_case = st.selectbox(
         "Select use case:",
-        ["Retail (Nike)", "Pharmacy (Raia)"],
+        ["Bank of Anthos", "Hipster Shop"],
         key="use_case",
     )
 
     text_model_pro, multimodal_model_pro = load_models(model_name)
 
-    if use_case == "Retail (Nike)":
-        video_uri = "gs://my-demo-project-samples/nike-sbf.mp4"
+    if use_case == "Bank of Anthos":
+        video_uri = "gs://convento-samples/boa-mobile.mp4"
     else:
-        video_uri = "gs://convento-samples/raia.mp4"
+        video_uri = "gs://convento-samples/hipster-mobile.mp4"
 
     video_url = ("https://storage.googleapis.com/" + video_uri.split("gs://")[1])
     
@@ -103,7 +103,7 @@ with col2:
         wcag_analysis_placeholder = st.empty()
         if st.button("Generate WCAG Analysis", key="generate_wcag_analysis"):
             prompt_wcag = f"""All responses should be in {story_lang}.
-            Analyze the video of a user interacting with the {'Nike online store' if use_case == 'Retail (Nike)' else 'online pharmacy app'}.
+            Analyze the video of a user interacting with the {'Bank of Anthos' if use_case == 'Bank of Anthos' else 'Hipster Shop'}.
             Identify specific accessibility issues and improvement opportunities based on WCAG 2.1 guidelines.
 
             Key areas to evaluate:

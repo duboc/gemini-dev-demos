@@ -98,16 +98,16 @@ with col2:
 
     use_case = st.selectbox(
         "Select use case:",
-        ["Nike Mobile App", "Brazilian Pharmacy App"],
+        ["Bank of Anthos", "Hipster Shop"],
         key="use_case",
     )
 
 load_vertex(model_region)
 text_model_pro, multimodal_model_pro = load_models(model_name)
 
-if use_case == "Nike Mobile App":
-    video_uri = "gs://convento-samples/nike-sbf.mp4"
-    heuristic_prompt = """You are reviewing a video recording of a user interacting with the Nike online store's mobile app. Your objective is to conduct a thorough UX evaluation using Nielsen's 10 Usability Heuristics as a framework, pinpointing specific areas where the app excels and where it could be improved. Focus on the following key areas, aligning your analysis with Nielsen's principles:
+if use_case == "Bank of Anthos":
+    video_uri = "gs://convento-samples/boa-mobile.mp4"
+    heuristic_prompt = """You are reviewing a video recording of a user interacting with the Bank of Anthos online banking mobile app. Your objective is to conduct a thorough UX evaluation using Nielsen's 10 Usability Heuristics as a framework, pinpointing specific areas where the app excels and where it could be improved. Focus on the following key areas, aligning your analysis with Nielsen's principles:
 
 1. Visibility of System Status
 2. Match Between System and the Real World
@@ -123,8 +123,8 @@ if use_case == "Nike Mobile App":
 Provide a detailed analysis for each heuristic, including specific examples from the video.
 """
 else:
-    video_uri = "gs://convento-samples/raia.mp4"
-    heuristic_prompt = """You are reviewing a video recording of a user interacting with a Brazilian online mobile pharmacy store app. Your objective is to conduct a thorough UX evaluation using Nielsen's 10 Usability Heuristics as a framework, pinpointing specific areas where the app excels and where it could be improved, considering the Brazilian context. Focus on the following key areas, aligning your analysis with Nielsen's principles:
+    video_uri = "gs://convento-samples/hipster-mobile.mp4"
+    heuristic_prompt = """You are reviewing a video recording of a user interacting with a Brazilian retailer for mobile Hipster Shop store app. Your objective is to conduct a thorough UX evaluation using Nielsen's 10 Usability Heuristics as a framework, pinpointing specific areas where the app excels and where it could be improved, considering the Brazilian context. Focus on the following key areas, aligning your analysis with Nielsen's principles:
 
 1. Visibility of System Status
 2. Match Between System and the Real World

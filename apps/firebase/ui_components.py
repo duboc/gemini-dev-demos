@@ -82,7 +82,7 @@ def render_config_section():
             
             use_case = st.selectbox(
                 "Select use case:",
-                ["E-commerce (Nike)", "Pharmacy (Raia)", "Healthcare"],
+                ["Bank of Anthos", "Hipster Shop"],
                 key="use_case"
             )
         

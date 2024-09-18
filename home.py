@@ -4,7 +4,7 @@ import os
 
 # Override Streamlit's default page config
 st.set_page_config(
-    page_title="Generative AI Demos ✨",
+    page_title="Generative AI Craft Lab ✨",
     page_icon="./images/logo.png",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -89,14 +89,14 @@ if st.sidebar.button("Reset All"):
 
 # Display home page content only if no demo is selected
 if not st.session_state.current_page:
-    st.title("Generative AI Developer Demos ✨")
+    st.title("Generative AI Craft Lab ✨")
     left_co, cent_co, last_co = st.columns(3)
     with cent_co:
         st.image("images/gemini_gif.gif")
     st.subheader("🤖 **Unleash the Power of Gemini: Revolutionize Your Software Development**")
     st.markdown(
         """
-        This is your gateway to the future of AI-powered software development. Built with Streamlit 🎈, this interactive showcase demonstrates how Google's groundbreaking Gemini AI 
+        This is your gateway to the future of AI-powered software development. This interactive showcase demonstrates how Google's groundbreaking Gemini AI 
         models can transform your workflow.
     """
     )

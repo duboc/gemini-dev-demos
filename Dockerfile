@@ -10,7 +10,7 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables (replace with your values)
-ENV GCP_PROJECT=your-project-id
+ENV GCP_PROJECT=conventodapenha
 ENV GCP_REGION=us-central1
 ENV STREAMLIT_SERVER_ENABLE_STATIC_SERVING=true
 ENV DEMO_ASSETS_BUCKET=bucket-name

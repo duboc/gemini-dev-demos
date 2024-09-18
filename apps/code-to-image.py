@@ -108,11 +108,11 @@ with col1:
             image_part = Part.from_bytes(image_upload.getvalue(), mime_type=image_upload.type)
     else:
         if use_case == "Sprint Planning":
-            image_url = "gs://convento-samples/tela-login.png"
+            image_url = "gs://convento-samples/boa-login.png"
             prompt = f"""
             All answers should be provided in {story_lang}.
             Explain this login screen in the format of feature implementation for a user story.
-            This description will be used for development backlog for frontend, backend, and Google Cloud deployment plan.
+            This description will be used for development backlog for frontend, backend, and Google Cloud deployment plan and also implement login with facebook, google and apple.
             """
         elif use_case == "Random Jokes Website":
             image_url = "gs://convento-samples/guardanapo.jpg"
@@ -123,11 +123,12 @@ with col1:
             This description will be used for development backlog for frontend, backend, and Google Cloud deployment plan.
             """
         else:  # Test Plan Generation
-            image_url = "gs://convento-samples/tela-login.png"
+            image_url = "gs://convento-samples/boa-login.png"
             prompt = f"""
             All answers should be provided in {story_lang}.
             Explain this login screen in the format of a test plan for a user story.
             This description will be used for development backlog.
+            and also implement login with facebook, google and apple.
             """
         
         image_part = Part.from_uri(mime_type="image/png", uri=image_url)
