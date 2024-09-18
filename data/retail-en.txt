@@ -1,0 +1,14 @@
+[Discovery] As a customer, I want to easily find products relevant to my needs, both online and in the physical store.
+[Research and Comparison] As a customer, I want to compare prices, features, and reviews of similar products to make the best purchase decision.
+[Purchase (Online)] As a customer, I want an intuitive and secure online shopping process with various payment and delivery options.
+[Purchase (Physical Store)] As a customer, I want to easily find products in the store, receive assistance from attentive salespeople, and have a quick and efficient checkout.
+[Post-Purchase (Online)] As a customer, I want to track the status of my order, receive delivery notifications, and have easy exchange or return options.
+[Post-Purchase (Physical Store)] As a customer, I want to exchange or return products without complications and receive support for questions or problems.
+[Loyalty] As a customer, I want to be recognized and rewarded for my purchases, receive personalized offers, and participate in loyalty programs.
+[Physical Store] As a customer, I want to receive attentive and personalized service from salespeople who know the products well and can help me find what I need.
+[Online (Chat/Email)] As a customer, I want access to efficient online service channels, with quick responses and effective solutions to my questions or problems.
+[Customer Service Center] As a customer, I want to speak with trained representatives and resolve my problems quickly and satisfactorily.
+[Self-Service Channels] As a customer, I want to find information and solutions to common problems through FAQs, video tutorials, and chatbots.
+[Personalization] As a customer, I want to receive product recommendations, offers, and content relevant to my interests and purchase history.
+[Omnichannel] As a customer, I want an integrated shopping experience, with access to the same products, information, and services across all sales channels (online and offline).
+[Sustainability] As a customer, I want to have access to information about the origin and environmental impact of products, as well as more sustainable purchase and disposal options.

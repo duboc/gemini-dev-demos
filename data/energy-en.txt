@@ -1,0 +1,7 @@
+[Consumption] As a customer, I want to view my energy consumption history so I can understand my usage patterns.
+[Alerts] As a customer, I want to receive alerts about planned power outages so I can plan ahead.
+[New Connection] As a customer, I want to request a new energy supply point quickly and easily.
+[Portal] As a customer, I want to access an online portal to manage my energy account and make payments.
+[Customer Service] As a customer, I want to contact a customer service representative to answer questions and resolve problems.
+[Transparency] As a customer, I want to receive clear and transparent information about rates, deadlines, and service conditions.
+[Complaints] As a customer, I want to have access to a communication channel to register complaints and suggestions.

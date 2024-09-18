@@ -11,8 +11,15 @@ def load_models(model_name):
         return model_gemini_flash
 
 def load_questions(file_path):
-    with open(file_path, 'r') as f:
-        return f.read().splitlines()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read().splitlines()
+    except FileNotFoundError:
+        st.warning(f"File not found: {file_path}. Falling back to English version.")
+        # Fallback to English version
+        english_file_path = file_path.replace('-es.txt', '-en.txt').replace('-pt.txt', '-en.txt')
+        with open(english_file_path, 'r', encoding='utf-8') as f:
+            return f.read().splitlines()
 
 if 'results' not in st.session_state:
     st.session_state['results'] = []
@@ -68,17 +75,24 @@ with col1:
         key="category"
     )
 
-    QUESTIONS_FILE = f"./data/{selected_category}.txt"
-    questions = load_questions(QUESTIONS_FILE)
-
-    persona_name = st.text_input("Persona:", key="persona_name", value="Breno Cabral")
-
     story_lang = st.radio(
         "Select language for story generation:",
-        ["Portuguese", "Spanish", "English"],
+        ["English", "Portuguese", "Spanish"],
         key="story_lang",
         horizontal=True,
     )
+
+    # Map selected language to file suffix
+    lang_suffix = {
+        "English": "en",
+        "Portuguese": "pt",
+        "Spanish": "es"
+    }
+
+    QUESTIONS_FILE = f"./data/{selected_category}-{lang_suffix[story_lang]}.txt"
+    questions = load_questions(QUESTIONS_FILE)
+
+    persona_name = st.text_input("Persona:", key="persona_name", value="Breno Cabral")
 
 with col2:
     selected_index = st.selectbox('Select a theme:', 

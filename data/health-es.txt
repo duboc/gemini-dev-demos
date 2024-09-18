@@ -1,0 +1,5 @@
+[Historia Clínica] Como profesional de la salud, quiero acceder al historial clínico electrónico del paciente rápidamente para agilizar la atención.
+[Receta Electrónica] Como médico, quiero recetar medicamentos electrónicamente para facilitar la vida del paciente.
+[Telemedicina] Como médico, quiero realizar consultas en línea para atender a pacientes de forma remota.
+[Integración] Como gestor de salud, quiero integrar sistemas de información para optimizar los procesos.
+[Datos] Como investigador, quiero acceder a datos de salud anonimizados para estudios epidemiológicos.

@@ -1,0 +1,14 @@
+[Descubrimiento] Como cliente, quiero encontrar fácilmente productos relevantes para mis necesidades, tanto online como en la tienda física.
+[Investigación y Comparación] Como cliente, quiero comparar precios, características y reseñas de productos similares para tomar la mejor decisión de compra.
+[Compra (Online)] Como cliente, quiero un proceso de compra online intuitivo, seguro y con diversas opciones de pago y entrega.
+[Compra (Tienda Física)] Como cliente, quiero encontrar fácilmente los productos en la tienda, recibir ayuda de vendedores atentos y tener un proceso de pago rápido y eficiente.
+[Post-Compra (Online)] Como cliente, quiero rastrear el estado de mi pedido, recibir notificaciones sobre la entrega y tener opciones fáciles de cambio o devolución.
+[Post-Compra (Tienda Física)] Como cliente, quiero cambiar o devolver productos sin complicaciones y recibir soporte para dudas o problemas.
+[Fidelización] Como cliente, quiero ser reconocido y recompensado por mis compras, recibir ofertas personalizadas y participar en programas de fidelidad.
+[Tienda Física] Como cliente, quiero recibir atención atenta y personalizada de vendedores que conozcan bien los productos y puedan ayudarme a encontrar lo que necesito.
+[Online (Chat/Correo Electrónico)] Como cliente, quiero tener acceso a canales de atención online eficientes, con respuestas rápidas y soluciones eficaces para mis dudas o problemas.
+[Central de Atención al Cliente] Como cliente, quiero hablar con agentes capacitados y resolver mis problemas de forma rápida y satisfactoria.
+[Canales de Autoatención] Como cliente, quiero encontrar información y soluciones para problemas comunes a través de preguntas frecuentes, tutoriales en vídeo y chatbots.
+[Personalización] Como cliente, quiero recibir recomendaciones de productos, ofertas y contenido relevantes para mis intereses e historial de compras.
+[Omnicanal] Como cliente, quiero una experiencia de compra integrada, con acceso a los mismos productos, información y servicios en todos los canales de venta (online y offline).
+[Sostenibilidad] Como cliente, quiero tener acceso a información sobre el origen y el impacto ambiental de los productos, además de opciones de compra y desecho más sostenibles.

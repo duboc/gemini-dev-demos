@@ -1,0 +1,5 @@
+[Medical Record] As a healthcare professional, I want to access the patient's electronic medical record quickly to expedite care.
+[Prescription] As a doctor, I want to prescribe medications electronically to make life easier for the patient.
+[Telemedicine] As a doctor, I want to conduct online consultations to see patients remotely.
+[Integration] As a healthcare administrator, I want to integrate information systems to optimize processes.
+[Data] As a researcher, I want to access anonymized health data for epidemiological studies.

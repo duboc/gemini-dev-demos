@@ -1,0 +1,7 @@
+[Consumo] Como cliente, quiero visualizar mi historial de consumo de energía para entender mis patrones de uso.
+[Alertas] Como cliente, quiero recibir alertas sobre interrupciones de energía programadas para poder planificar con antelación.
+[Adhesión] Como cliente, quiero solicitar un nuevo punto de suministro de energía de forma rápida y sencilla.
+[Portal] Como cliente, quiero acceder a un portal online para gestionar mi cuenta de energía y realizar pagos.
+[Atención al cliente] Como cliente, quiero ponerme en contacto con un representante de atención al cliente para resolver dudas y problemas.
+[Transparencia] Como cliente, quiero recibir información clara y transparente sobre tarifas, plazos y condiciones del servicio.
+[Reclamaciones] Como cliente, quiero tener acceso a un canal de comunicación para registrar reclamaciones y sugerencias.

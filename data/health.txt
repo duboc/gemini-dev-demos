@@ -1,5 +1,0 @@
-Prontuário: Como profissional de saúde, quero acessar o prontuário eletrônico do paciente de forma rápida para agilizar o atendimento.
-Prescrição: Como médico, quero prescrever medicamentos eletronicamente para facilitar a vida do paciente.
-Telemedicina: Como médico, quero realizar consultas online para atender pacientes remotamente.
-Integração: Como gestor de saúde, quero integrar sistemas de informação para otimizar processos.
-Dados: Como pesquisador, quero acessar dados de saúde anonimizados para estudos epidemiológicos. 
