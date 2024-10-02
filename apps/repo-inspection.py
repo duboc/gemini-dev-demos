@@ -135,7 +135,7 @@ col1, col2 = st.columns([4, 6])
 with col1:
     # Step 1: Repo Input
     st.header("Step 1: Repository Input", divider="gray")
-    repo_url = st.text_input("Enter a GitHub repository URL:", "https://github.com/GoogleCloudPlatform/microservices-demo")
+    repo_url = st.text_input("Enter a GitHub repository URL:", "https://github.com/duboc/gemini-firestore-rag")
 
     if st.button("Clone and Index Repository"):
         with st.spinner("Cloning and indexing repository..."):
