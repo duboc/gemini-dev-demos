@@ -67,18 +67,25 @@ if 'selected_category' not in st.session_state:
 st.sidebar.image("images/logo.png", width=50)
 st.sidebar.title("Demo Categories")
 
-# Radio buttons for categories
-selected_category = st.sidebar.radio(
+# Dropdown for categories instead of radio buttons
+selected_category = st.sidebar.selectbox(
     "Select a category:",
     options=list(demo_pages.keys()),
     key="selected_category"
 )
 
+# Use columns for demo buttons
 st.sidebar.title("Demos")
-for page in demo_pages[st.session_state.selected_category]:
-    if st.sidebar.button(page["title"]):
-        st.session_state.current_page = page["path"]
-        st.rerun()
+col1, col2 = st.sidebar.columns(2)
+for i, page in enumerate(demo_pages[st.session_state.selected_category]):
+    if i % 2 == 0:
+        if col1.button(page["title"], key=f"btn_{i}"):
+            st.session_state.current_page = page["path"]
+            st.rerun()
+    else:
+        if col2.button(page["title"], key=f"btn_{i}"):
+            st.session_state.current_page = page["path"]
+            st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.info("If you encounter a state error, click the 'Reset All' button below.")
@@ -94,13 +101,22 @@ if not st.session_state.current_page:
     with cent_co:
         st.image("images/gemini_gif.gif")
     st.subheader("🤖 **Unleash the Power of Gemini: Revolutionize Your Software Development**")
+    
+    # Add a brief description for each category
+    st.markdown("### 📚 Demo Categories")
+    for category, demos in demo_pages.items():
+        with st.expander(category):
+            for demo in demos:
+                st.write(f"- {demo['title']}")
+    
     st.markdown(
         """
         This is your gateway to the future of AI-powered software development. Built with Streamlit 🎈, this interactive showcase demonstrates how Google's groundbreaking Gemini AI 
         models can transform your workflow.
+        
+        👈 Select a demo category from the sidebar to get started.
     """
     )
-    st.subheader("👈 Select a demo category from the sidebar to get started.")
 
 # Load the selected demo page
 if st.session_state.current_page:

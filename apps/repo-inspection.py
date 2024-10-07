@@ -20,7 +20,7 @@ vertexai.init(project=PROJECT_ID, location=LOCATION)
 m = magika.Magika()
 
 # Constants
-MODEL_ID = "gemini-experimental"
+MODEL_ID = "gemini-1.5-flash-002"
 REPO_DIR = "./repo"
 
 # Safety settings

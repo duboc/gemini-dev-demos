@@ -22,9 +22,9 @@ steps:
            '--allow-unauthenticated']
 
 substitutions:
-  _ARTIFACT_REGISTRY_REPO: dev-lifecycle
+  _ARTIFACT_REGISTRY_REPO: gemini-dev-demos
   _REPO_LOCATION: us-central1
-  _SERVICE_NAME: dev-lifecycle
+  _SERVICE_NAME: gemini-re-demos
   _SERVICE_REGION: us-central1
 
 # gcloud artifacts repositories create dev-lifecycle --repository-format=docker --location=us-central1 --description="Gemini Developer Lifecycle Demo"
