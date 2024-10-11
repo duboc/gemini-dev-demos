@@ -1,7 +1,7 @@
 import streamlit as st
-from apps.firebase.config import load_vertex, load_models, video_uris
-from apps.firebase.ui_components import render_custom_css, render_header, render_config_section, render_video_analysis_section
-from apps.firebase.generation import generate_video_description, generate_robo_script
+from config import load_vertex, load_models, video_uris
+from firebase.ui_components import render_custom_css, render_header, render_config_section, render_video_analysis_section
+from firebase.generation import generate_video_description, generate_robo_script
 
 render_custom_css()
 render_header()

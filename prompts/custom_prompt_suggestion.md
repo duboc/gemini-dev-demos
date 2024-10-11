@@ -1,0 +1,1 @@
+Analyze this image and provide a detailed description of its contents, focusing on [specific aspect]. Then, suggest potential applications or use cases for this image in the context of [your industry/field].

@@ -4,8 +4,8 @@ import os
 import json
 
 def load_prompt(prompt_name):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    prompt_path = os.path.join(script_dir, 'prompts', f'{prompt_name}_prompt.md')
+    #script_dir = os.path.dirname(os.path.abspath(__file__))
+    prompt_path = os.path.join('prompts', f'{prompt_name}_prompt.md')
     with open(prompt_path, 'r') as file:
         return file.read().strip()
 

@@ -5,7 +5,7 @@ from utils_streamlit import reset_st_state
 def load_models(model_name):
     if model_name == "gemini-experimental":
         return model_experimental
-    elif model_name == "gemini-1.5-pro-001":
+    elif model_name == "gemini-1.5-pro-002":
         return model_gemini_pro_15
     else:
         return model_gemini_flash
@@ -16,10 +16,13 @@ def load_questions(file_path):
             return f.read().splitlines()
     except FileNotFoundError:
         st.warning(f"File not found: {file_path}. Falling back to English version.")
-        # Fallback to English version
         english_file_path = file_path.replace('-es.txt', '-en.txt').replace('-pt.txt', '-en.txt')
         with open(english_file_path, 'r', encoding='utf-8') as f:
             return f.read().splitlines()
+
+def load_prompt(file_name):
+    with open(f"prompts/{file_name}.md", "r") as file:
+        return file.read()
 
 if 'results' not in st.session_state:
     st.session_state['results'] = []
@@ -28,9 +31,8 @@ if st.button("Reset Demo State", key="reset_button"):
     reset_st_state()
     st.session_state['results'] = []
 
-st.title("User Story to Code 💻 ")
+st.title("User Story to Code 💻")
 
-# Initialize button states in session state
 if 'button_states' not in st.session_state:
     st.session_state.button_states = {
         'generate_story': False,
@@ -39,7 +41,6 @@ if 'button_states' not in st.session_state:
         'generate_test': False
     }
 
-# Function to update button state
 def update_button_state(button_key):
     st.session_state.button_states[button_key] = True
 
@@ -56,13 +57,13 @@ def create_button_with_status(label, key, disabled=False):
             st.markdown(':blue[Ready]')
     return clicked
 
-col1, col2 = st.columns([1, 2])
+col1, col2 = st.columns([1, 4])
 
 with col1:
     st.subheader("Configuration")
     model_name = st.radio(
         "Model:",
-        ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
+        ["gemini-experimental", "gemini-1.5-pro-002", "gemini-1.5-flash-002"],
         captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
         key="model_name",
         index=0,
@@ -71,20 +72,19 @@ with col1:
 
     model = load_models(model_name)
 
-    selected_category = st.radio(
+    selected_category = st.selectbox(
         "Select Industry:",
-        ["retail", "energy", "health", "finance", "beauty"],
+        ["retail", "energy", "health", "finance", "beauty", "games", "ecom", "education", "fintech" ],
         key="category"
     )
 
     story_lang = st.radio(
         "Select language for story generation:",
-        ["English", "Portuguese", "Spanish"],
+        ["Portuguese", "English", "Spanish"],
         key="story_lang",
         horizontal=True,
     )
 
-    # Map selected language to file suffix
     lang_suffix = {
         "English": "en",
         "Portuguese": "pt",
@@ -105,30 +105,11 @@ with col2:
     user_story = st.text_area("Edit your theme:", value=questions[selected_index], height=200)
 
     if create_button_with_status("1. Generate my story", "generate_story"):
-        prompt = f"""Write a User story based on the following premise:
-        persona_name: {persona_name}
-        user_story: {user_story}
-        First start by giving the user Story a Summary: [concise, memorable, human-readable story title] 
-        User Story Format example:
-            As a: [persona_type]
-            I want to: [Action or Goal]
-            So that: [Benefit or Value]
-            Additional Context: [Optional details about the scenario, environment, or specific requirements]
-            Acceptance Criteria: [Specific, measurable conditions that must be met for the story to be considered complete]
-                *   **Scenario**: 
-                        [concise, human-readable user scenario]
-                *   **Given**: 
-                        [Initial context]
-                *   **and Given**: 
-                        [Additional Given context]
-                *   **and Given** 
-                        [additional Given context statements as needed]
-                *   **When**: 
-                        [Event occurs]
-                *   **Then**: 
-                        [Expected outcome]
-        All the answers are required to be in {story_lang} and to stick to the persona. 
-        """
+        prompt = load_prompt("story_prompt").format(
+            persona_name=persona_name,
+            user_story=user_story,
+            story_lang=story_lang
+        )
 
         with st.spinner("Generating your story using Gemini ..."):
             responseStory = sendPrompt(prompt, model)
@@ -142,13 +123,7 @@ with col2:
         if st.session_state['results']:
             last_story = next((result for result in reversed(st.session_state['results']) if result[0] == "User Story"), None)
             if last_story:
-                promptTasks = f"""All the answers are required to be in {story_lang} and to stick to the persona.
-                Divide the user story into tasks as granular as possible.
-                The goal of fragmenting a user story is to create a list of tasks that can be completed within a sprint.
-                Therefore, it is important to break down the story into minimal tasks that still add value to the end user.
-                This facilitates progress tracking and ensures that the team stays on track.
-                Create a table with the tasks as the table index with the task description.
-                """ + last_story[1]
+                promptTasks = load_prompt("tasks_prompt").format(story_lang=story_lang) + last_story[1]
 
                 with st.spinner("Generating your tasks using Gemini Pro ..."):
                     responseTasks = sendPrompt(promptTasks, model)
@@ -166,23 +141,7 @@ with col2:
         if st.session_state['results']:
             last_tasks = next((result for result in reversed(st.session_state['results']) if result[0] == "Tasks"), None)
             if last_tasks:
-                promptCodeGeneration = f"""
-                    Based on the list of tasks, create Python code snippets to implement the functionality for the first task in the list.
-                    Identify specific constraints or requirements that impact the implementation:
-                    Time or resource limitations
-                    Compatibility with external APIs or libraries
-                    Coding standards or style guidelines to be followed
-                    Clearly document any assumptions or premises made.
-                    Follow these directives:
-                    - Use Google Style Guide for formatting
-                    - Utilize existing tools and frameworks
-                    - Ensure code reproducibility in different environments
-                    - Format code with proper indentation and spacing
-                    - Include explanatory comments for each section of the code
-                    - Provide documentation with usage examples and additional information
-                    All the answers are required to be in {story_lang} and to stick to the persona.
-                    Create code only for the first task. Make a numbered list where the first item is the task name, the second is a summary of the code, and then include the generated snippet and as many new items as needed to complement the required information.
-"""  + last_tasks[1]
+                promptCodeGeneration = load_prompt("code_prompt").format(story_lang=story_lang) + last_tasks[1]
 
                 with st.spinner("Generating your code using Gemini..."):
                     responseCodeSnippets = sendPrompt(promptCodeGeneration, model)
@@ -200,34 +159,7 @@ with col2:
         if st.session_state['results']:
             last_code = next((result for result in reversed(st.session_state['results']) if result[0] == "Code Snippets"), None)
             if last_code:
-                promptUnitTest = f"""
-                    All the answers are required to be in {story_lang}.
-                    You are an expert software developer specializing in writing high-quality unit tests. Your task is to create comprehensive unit tests for the given code snippet. Follow these guidelines:
-
-                    Analyze the provided code carefully, identifying its purpose, inputs, outputs, and potential edge cases.
-                    Create a suite of unit tests that covers:
-
-                    Happy path scenarios
-                    Edge cases
-                    Error handling
-                    Boundary conditions
-
-                    Use appropriate testing frameworks and assertions based on the programming language of the code.
-                    Follow best practices for unit testing, including:
-
-                    Descriptive test names
-                    Arrange-Act-Assert (AAA) pattern
-                    One assertion per test when possible
-                    Proper setup and teardown if needed
-
-                    Include comments explaining the purpose of each test and any complex logic.
-                    If the code has dependencies, suggest appropriate mocking or stubbing strategies.
-                    Provide a brief explanation of your testing approach and any assumptions made.
-                    Please generate a comprehensive set of unit tests for this code, following the guidelines above.
-
-                    Given the following code snippet:
-
-                    """ + last_code[1]
+                promptUnitTest = load_prompt("unittest_prompt").format(story_lang=story_lang) + last_code[1]
 
                 with st.spinner("Generating your UnitTest implementation using Gemini..."):
                     responseUnitTest = sendPrompt(promptUnitTest, model)
