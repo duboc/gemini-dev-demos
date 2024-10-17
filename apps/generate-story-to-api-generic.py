@@ -1,6 +1,7 @@
 import streamlit as st
 from utils_vertex import sendPrompt, model_experimental, model_gemini_pro_15_002, model_gemini_flash_002
 from utils_streamlit import reset_st_state
+import os
 
 def load_models(model_name):
     if model_name == "gemini-experimental":
@@ -22,8 +23,12 @@ def load_questions(file_path):
             return f.read().splitlines()
 
 def load_prompt(file_name):
-    with open(f"prompts/{file_name}.md", "r") as file:
+    with open(os.path.join("prompts", file_name + ".md"), "r", encoding="utf-8") as file:
         return file.read()
+
+#def load_prompt(file_name):
+#    with open(f"./prompts/{file_name}.md", "r") as file:
+#        return file.read()
 
 if 'results' not in st.session_state:
     st.session_state['results'] = []

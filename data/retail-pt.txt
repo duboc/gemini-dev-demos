@@ -7,7 +7,7 @@
 [Fidelização] Como cliente, quero ser reconhecido e recompensado por minhas compras, receber ofertas personalizadas e participar de programas de fidelidade.
 [Loja Física] Como cliente, quero receber atendimento atencioso e personalizado de vendedores que conheçam bem os produtos e possam me ajudar a encontrar o que preciso.
 [Online (Chat/E-mail)] Como cliente, quero ter acesso a canais de atendimento online eficientes, com respostas rápidas e soluções eficazes para minhas dúvidas ou problemas.
-[Central de Atendimento Como cliente, quero falar com atendentes capacitados e resolver meus problemas de forma rápida e satisfatória.
+[Central de Atendimento] Como cliente, quero falar com atendentes capacitados e resolver meus problemas de forma rápida e satisfatória.
 [Canais de Autoatendimento] Como cliente, quero encontrar informações e soluções para problemas comuns através de FAQs, tutoriais em vídeo e chatbots.
 [Personalização] Como cliente, quero receber recomendações de produtos, ofertas e conteúdo relevantes para meus interesses e histórico de compras.
 [Omnichannel] Como cliente, quero uma experiência de compra integrada, com acesso aos mesmos produtos, informações e serviços em todos os canais de venda (online e offline).

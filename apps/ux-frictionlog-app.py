@@ -7,6 +7,15 @@ from config import (
     video_uris
 )
 from vertexai.generative_models import Part
+import os
+
+print("Current working directory:", os.getcwd())
+print("Contents of current directory:", os.listdir())
+print("Contents of prompts directory:", os.listdir("prompts"))
+
+def load_prompt(file_name):
+    with open(os.path.join("prompts", file_name + ".md"), "r", encoding="utf-8") as file:
+        return file.read()
 
 # Custom CSS to resize video, style tabs, and improve button appearance
 st.markdown("""
@@ -100,7 +109,7 @@ with col2:
     tab1, tab2, tab3, tab4 = st.tabs(["Friction Log", "User Story", "Task Backlog", "Prompts"])
     
     with tab1:
-        friction_prompt = read_prompt('prompts/friction_log_prompt.md').format(language=language, use_case=use_case)
+        friction_prompt = read_prompt('./prompts/friction_log_prompt.md').format(language=language, use_case=use_case)
         if st.button("Generate Friction Log", key="generate_friction_log", disabled=st.session_state['friction_status'] == "Running"):
             st.session_state['friction_status'] = "Running"
             with st.spinner("Generating Friction Log..."):

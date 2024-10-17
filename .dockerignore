@@ -44,8 +44,6 @@ ENV/
 Thumbs.db
 
 # Project specific
-data/
 docs/
 tests/
-*.md
 LICENSE
