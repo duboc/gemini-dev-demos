@@ -131,10 +131,11 @@ with col2:
             else:
                 st.session_state['user_stories_state'] = 'Running'
                 with st.spinner("Creating user stories from the heuristic analysis..."):
-                    full_prompt = f"All answers should be provided in {story_lang} {user_story_prompt}"
+                    full_prompt = f"All answers should be provided in {story_lang}. {user_story_prompt}"
                     try:
                         user_story_response = ""
-                        for chunk in get_gemini_pro_vision_response_stream(multimodal_model_pro, [full_prompt, st.session_state['heuristic_analysis']]):
+                        video_part = Part.from_uri(video_uri, mime_type="video/mp4")
+                        for chunk in get_gemini_pro_vision_response_stream(multimodal_model_pro, [full_prompt, video_part, st.session_state['heuristic_analysis']]):
                             user_story_response += chunk.text
                         st.session_state['user_stories'] = user_story_response
                         st.session_state['user_stories_state'] = 'Completed'

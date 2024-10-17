@@ -1,6 +1,7 @@
 import os
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 def load_vertex(region):
     PROJECT_ID = os.environ.get("GCP_PROJECT")
@@ -12,6 +13,7 @@ def load_models(name):
     multimodal_model_pro = GenerativeModel(name)
     return text_model_pro, multimodal_model_pro
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def get_gemini_pro_vision_response_stream(
     model, prompt_list, generation_config={}, stream: bool = True
 ):
@@ -26,7 +28,8 @@ def read_prompt(file_path):
 
 video_uris = {
     "Bank of Anthos": "gs://convento-samples/boa-mobile.mp4",
-    "Hipster Shop": "gs://convento-samples/hipster-mobile.mp4"
+    "Hipster Shop": "gs://convento-samples/hipster-mobile.mp4",
+    "Super Tux": "gs://convento-samples/supertux.mp4"
 }
 
 images_uris = { 

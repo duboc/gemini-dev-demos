@@ -1,14 +1,14 @@
 import streamlit as st
-from utils_vertex import sendPrompt, model_experimental, model_gemini_pro_15, model_gemini_flash
+from utils_vertex import sendPrompt, model_experimental, model_gemini_pro_15_002, model_gemini_flash_002
 from utils_streamlit import reset_st_state
 
 def load_models(model_name):
     if model_name == "gemini-experimental":
         return model_experimental
     elif model_name == "gemini-1.5-pro-002":
-        return model_gemini_pro_15
+        return model_gemini_pro_15_002
     else:
-        return model_gemini_flash
+        return model_gemini_flash_002
 
 def load_questions(file_path):
     try:

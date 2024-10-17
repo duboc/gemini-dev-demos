@@ -1,6 +1,6 @@
 steps:
   # Install dependencies
-  - name: python
+  - name: python:3.12
     entrypoint: pip
     args: ["install", "-r", "requirements.txt", "--user"]
   
