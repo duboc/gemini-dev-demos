@@ -3,10 +3,6 @@ from utils_vertex import sendPrompt, model_experimental, model_gemini_pro_15_002
 from utils_streamlit import reset_st_state
 import os
 
-st.write("Current working directory:", os.getcwd())
-st.write("Contents of current directory:", os.listdir())
-st.write("Contents of prompts directory:", os.listdir("prompts"))
-
 def load_models(model_name):
     if model_name == "gemini-experimental":
         return model_experimental

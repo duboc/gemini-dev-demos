@@ -9,9 +9,6 @@ from config import (
 from vertexai.generative_models import Part
 import os
 
-print("Current working directory:", os.getcwd())
-print("Contents of current directory:", os.listdir())
-print("Contents of prompts directory:", os.listdir("prompts"))
 
 def load_prompt(file_name):
     with open(os.path.join("prompts", file_name + ".md"), "r", encoding="utf-8") as file:
