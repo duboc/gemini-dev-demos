@@ -1,136 +1,392 @@
-# Generative AI = Developer Lifecyle Demos ✨
+# Gemini developer lifecycle demos
 
-<center>
-<img src="images/gemini_gif.gif" alt="Gemini Gif" width="250" height="250">
-</center>
+This repository contains 13 interactive [Streamlit](https://streamlit.io/) demos
+that call Google's Gemini models through
+[Vertex AI](https://cloud.google.com/vertex-ai/docs). Each demo applies a Gemini
+model to one stage of the software development lifecycle: inspecting a
+codebase, migrating legacy code, generating test scripts from screen
+recordings, reviewing user experience and accessibility, turning user stories
+into code, and generating data pipelines.
 
-This repository showcases a suite of interactive demos leveraging Google's Gemini AI models to revolutionize software development workflows. Built with Streamlit, these demos cover various aspects of the development lifecycle, providing practical examples of AI-assisted software engineering.
+The demos target developers, solution architects, and technical presenters who
+want runnable examples of AI-assisted engineering. Treat the code as
+demonstration material that you read, run, and adapt, not as production
+software.
 
-## 🚀 Features
+![Animated Gemini logo](images/gemini_gif.gif)
 
-- **Code Intelligence**: Repo inspection, image-to-code generation, and legacy code migration.
-- **Test Automation**: Selenium, Firebase Robo Script, and Appium automation.
-- **UX/UI Design**: Heuristic analysis, friction log generation, and accessibility testing.
-- **User Story Automation**: Generating code, data models, and APIs from user stories.
-- **DataOps**: Dataform ELT generation.
+## Before you begin
 
-## 🛠 Setup
+Install and configure the following:
 
-1. **Clone the repository:**
+- Python 3.12. The container image in `Dockerfile` builds on `python:3.12`, so
+  use the same version locally to match it.
+- A Google Cloud project with billing enabled.
+- The [Google Cloud CLI](https://cloud.google.com/sdk/docs/install),
+  authenticated against that project.
+- [Docker](https://docs.docker.com/get-started/get-docker/), if you plan to
+  build the container image or deploy to Cloud Run.
+
+Enable these APIs in your project. The `setup.sh` script enables all of them for
+you:
+
+- `aiplatform.googleapis.com`
+- `cloudbuild.googleapis.com`
+- `run.googleapis.com`
+- `artifactregistry.googleapis.com`
+- `iam.googleapis.com`
+- `storage-api.googleapis.com`
+
+### Gemini model identifiers
+
+`utils_vertex.py` holds every Gemini identifier this repository sends to
+Vertex AI, in two module-level constants. No file under `apps/` carries a
+model literal of its own: every demo imports `MODEL_ID`, and a demo that
+offers a model picker lists that one identifier, so a single edit reaches all
+13 demos.
+
+| Identifier | Constant in `utils_vertex.py` | Availability on Vertex AI |
+| --- | --- | --- |
+| `gemini-3.8-flash` | `MODEL_ID` | Listed under "Models available for shorter availability periods", a tier whose members retire 45 days after Google ships a replacement. The page states no fixed date. |
+| `gemini-embedding-001` | `EMBEDDING_MODEL_ID` | Listed among the embeddings models Vertex AI serves. No demo calls it, so the constant names the model an embedding feature would reach for. |
+
+Both identifiers come from
+[Model versions and lifecycle](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versioning),
+the page that states which models Vertex AI serves and for how long. Read it
+again before you trust either one. A 45-day window is short enough that a
+checkout a few months old can name a model the API no longer answers, and
+Vertex AI responds to a retired identifier with a not-found error rather than
+a fallback.
+
+The same page dates the end of service for `gemini-embedding-001` no sooner
+than May 20, 2028, so the embedding constant carries far more runway than the
+generation one. That row sits in the "Embeddings models" table, which the page
+shows without a click.
+
+Dates for models Vertex AI already retired sit one level down, inside the
+expander labeled "The following table lists the retired models (click to
+expand)", so open the expander before you look for one of those.
+`check_readme.py` rejects a date that its transcription of these tables does
+not carry.
+
+`gemini-3.8-flash` handles every prompt in this repository, including the ones
+that send a video or an image. That is a change from the earlier layout, where
+`utils_vertex.py` exported five model objects and the demos picked among
+three. Those objects, and the image generation and multimodal embedding models
+that sat beside them, are gone.
+
+### Key dependencies
+
+`requirements.txt` lists 15 direct dependencies. The demos depend most
+directly on these packages:
+
+- `streamlit` renders every demo page.
+- `google-genai` carries every Gemini call, in Vertex AI mode.
+- `GitPython` clones the repository that the repository inspection demo
+  analyzes.
+- `magika` classifies the file types that the same demo reads.
+- `pandas` builds the token usage table that the same demo shows.
+
+That list is neither complete nor fully pinned, so two installs from the same
+`requirements.txt` can give you different code.
+
+`apps/repo-inspection.py` imports `pandas` to build that table. The manifest
+names `pandas` directly, so the demo survives a later `streamlit` release that
+drops it.
+
+`requirements.txt` does not list `nltk`, `nbconvert`, `nbformat`, or `PyPDF2`.
+No source file imports them, and between them they carried most of the
+security advisories this repository reported, including four that no release
+fixes.
+
+No source file imports `tqdm` either, but `magika` depends on it, so every
+install pulls it in. The `tqdm>=4.66.3` line holds that dependency above the
+version the advisory covers, which a reinstall over an older environment
+otherwise keeps.
+
+Eight of the 15 lines carry no version constraint, among them `streamlit`,
+`google-genai`, and `pandas`. Pin them before you depend on a build that has
+to keep working.
+
+## Set up your environment
+
+1. Clone the repository and change into it:
+
    ```bash
-   git clone https://github.com/your-username/generative-ai-demos.git
-   cd generative-ai-demos
+   git clone https://github.com/duboc/gemini-dev-demos.git
+   cd gemini-dev-demos
    ```
 
-2. **Install dependencies:**
+1. Create and activate a virtual environment:
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+1. Install the dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Set up Google Cloud Project:**
-   - Create or select a project in the [Google Cloud Console](https://console.cloud.google.com/).
-   - Enable required APIs: Vertex AI, Cloud Run, Cloud Build, Artifact Registry, IAM, and Cloud Storage.
-   - Create a service account with necessary permissions and download the JSON key file.
+1. Authenticate with application default credentials:
 
-4. **Configure environment variables:**
    ```bash
-   export GCP_PROJECT="your-project-id"
-   export GCP_REGION="your-preferred-region"
-   export GOOGLE_APPLICATION_CREDENTIALS="path/to/your/service-account-key.json"
+   gcloud auth application-default login
    ```
 
-## 🚀 Running the Demos
+1. Export the environment variables that the `google-genai` client reads:
 
-To run the demos locally:
+   ```bash
+   export GOOGLE_CLOUD_PROJECT="my-project"
+   export GOOGLE_CLOUD_LOCATION="us-central1"
+   export GOOGLE_GENAI_USE_VERTEXAI=true
+   ```
+
+   Replace `my-project` with your Google Cloud project ID and `us-central1` with
+   the region that serves the Gemini models you want to use. The third variable
+   points the client at Vertex AI instead of the Gemini Developer API, which
+   takes an API key.
+
+### Environment variables
+
+No file in this repository calls `os.environ` for any of the first three
+variables. The `google-genai` client reads them itself when `get_client()`
+constructs it, which is why a typo shows up as an authentication error from
+the SDK rather than as a `None` inside a demo.
+
+| Variable | Set or read by | Purpose |
+| --- | --- | --- |
+| `GOOGLE_CLOUD_PROJECT` | `Dockerfile` and `cloudbuild.yaml` set it, and the `google-genai` client reads it | Google Cloud project that bills and serves the Gemini calls. |
+| `GOOGLE_CLOUD_LOCATION` | `Dockerfile` and `cloudbuild.yaml` set it, and the `google-genai` client reads it | Default Vertex AI region. A demo that offers a region picker overrides it per call. |
+| `GOOGLE_GENAI_USE_VERTEXAI` | `Dockerfile` and `cloudbuild.yaml` set it | Set it to `true` to route the client through Vertex AI and application default credentials. |
+| `DEMO_ASSETS_BUCKET` | `Dockerfile` and `setup.sh` set it | Names a Cloud Storage bucket for demo assets. No file in this repository reads the variable, so setting it changes nothing. |
+| `STREAMLIT_SERVER_ENABLE_STATIC_SERVING` | `Dockerfile` sets it | Flag that lets Streamlit serve files from a static directory. |
+
+## Run the demos locally
+
+Start the Streamlit server from the repository root:
 
 ```bash
 streamlit run home.py
 ```
 
-This will start the Streamlit server and open the home page in your default web browser. Navigate through the sidebar to explore different demo categories and individual demos.
+Streamlit reads `.streamlit/config.toml`, which sets port 8080. Open
+`http://localhost:8080` in your browser to use the demos.
 
-## 🐳 Docker Support
+`home.py` renders the shell for every demo. Use the **Select a category** list
+in the sidebar to pick a category, then click a demo button to load that page.
+If the app reports a state error, click **Reset All** in the sidebar to clear
+the Streamlit session state.
 
-A Dockerfile is provided for containerizing the application. To build and run the Docker container:
+Every page renders on its own. A page that calls Gemini needs application
+default credentials and a project, so run
+`gcloud auth application-default login` and export the variables above before
+you press a generate button. For the identifiers those calls use, see
+[Gemini model identifiers](#gemini-model-identifiers).
 
-1. Build the Docker image:
+## Available demos
+
+Every demo lives in its own file under `apps/` and loads inside the `home.py`
+shell. The first column gives the label on the sidebar button that opens the
+demo.
+
+| Sidebar button | File | Description |
+| --- | --- | --- |
+| **Repo Inspection** | `apps/repo-inspection.py` | Clones a Git repository, classifies its files with Magika, generates an analysis of the codebase, and reports the tokens the run consumed. |
+| **Image to Code, Test and Deploy** | `apps/code-to-image.py` | Turns an uploaded image of an application screen into a description, backend code, frontend code, deployment commands, test cases, and a Selenium script. |
+| **Cobol to Java** | `apps/cobol-to-java.py` | Migrates a COBOL sample to Java in reviewable steps, then merges the steps into one program. |
+| **Selenium Automation** | `apps/selenium-automation.py` | Generates a Selenium test script from a video of a user session. |
+| **Firebase Robo Script** | `apps/firebase-testlab.py` | Generates a Firebase Test Lab Robo script from a video of an app walkthrough. |
+| **Appium Automation** | `apps/appium-automation.py` | Generates an Appium script for mobile testing from a video of an app walkthrough. |
+| **UX Heuristic Analysis using Gemini AI** | `apps/ux-heuristics-app.py` | Reviews an interface against usability heuristics and reports the findings. |
+| **UX Friction Log Generator** | `apps/ux-frictionlog-app.py` | Produces a friction log from a recording of a user interaction. |
+| **Accessibility with Gemini** | `apps/ux-accessibility.py` | Analyzes an interface against WCAG guidance, then turns the findings into accessibility user stories. |
+| **User Story to Code** | `apps/generate-story-to-code-generic.py` | Generates a user story, breaks it into tasks, then generates code and a unit test implementation. |
+| **User Story to Data** | `apps/generate-story-to-data-generic.py` | Generates a user story, breaks it into tasks, then generates a data warehouse model and a BigQuery implementation. |
+| **User Story to API** | `apps/generate-story-to-api-generic.py` | Generates a user story, breaks it into tasks, then generates an OpenAPI specification and an Apigee implementation. |
+| **Dataform ELT Generation** | `apps/dataform-gen.py` | Takes a schema that you enter and generates Dataform SQL and the matching Terraform definitions. |
+
+The three user story demos read seed prompts from `data/`. That directory holds
+one text file per industry and language, such as `data/retail-en.txt`,
+`data/finance-pt.txt`, and `data/health-es.txt`.
+
+`home.py` defines six categories, and the sidebar shows the buttons for the
+category you select. The last category, **Others**, repeats the Dataform ELT
+generation demo, so the six categories list 14 entries for 13 demo files.
+
+## Repository layout
+
+| Path | Contents |
+| --- | --- |
+| `home.py` | Streamlit entry point: sidebar, category list, and demo loader. |
+| `apps/` | One Python file per demo. |
+| `apps/firebase/` | Support modules for the Firebase Robo script demo: `apps/firebase/config.py`, `apps/firebase/generation.py`, and `apps/firebase/ui_components.py`. |
+| `apps/firebase/prompts/` | Markdown prompt templates for that demo. |
+| `utils_vertex.py` | Shared Gemini access: the `google-genai` client, the model identifiers, the safety settings, and the `sendPrompt()` helper. |
+| `utils_streamlit.py` | Helpers that reset Streamlit session state. |
+| `snippets/model-request.py` | Minimal example of calling `sendPrompt()`. |
+| `data/` | Seed text for the user story demos. |
+| `images/` | Logo and animation that the interface displays. |
+| `.streamlit/config.toml` | Streamlit server, browser, and theme settings. |
+| `Dockerfile` | Container image definition. |
+| `cloudbuild.yaml` | Cloud Build pipeline that builds, pushes, and deploys the image. |
+| `setup.sh` | One-shot script that enables APIs, creates a bucket and an Artifact Registry repository, and deploys to Cloud Run from source. |
+| `check_readme.py` | Verification script for this README. |
+| `docs/CONTRIBUTING.md` | Contribution guide. |
+| `LICENSE` | Apache License 2.0 text. |
+
+## Run the demos in a container
+
+1. Build the image:
+
    ```bash
-   docker build -t generative-ai-demos .
+   docker build -t gemini-dev-demos .
    ```
 
-2. Run the container:
+1. Run the container, overriding the placeholder values that `Dockerfile` bakes
+   in:
+
    ```bash
-   docker run -p 8080:8080 -e GCP_PROJECT=your-project-id -e GCP_REGION=your-region generative-ai-demos
+   docker run -p 8080:8080 \
+     -e GOOGLE_CLOUD_PROJECT="${GOOGLE_CLOUD_PROJECT}" \
+     -e GOOGLE_CLOUD_LOCATION="${GOOGLE_CLOUD_LOCATION}" \
+     gemini-dev-demos
    ```
 
-Access the application at `http://localhost:8080` in your web browser.
+The image exposes port 8080 and starts `streamlit run home.py`. Open
+`http://localhost:8080` to use the demos.
 
-## ☁️ Deployment with Cloud Build
+The container has no Google Cloud credentials of its own. Mount your
+application default credentials into the container or run it on a Google Cloud
+service that provides a service identity.
 
-This project includes a `cloudbuild.yaml` file for automated builds and deployments using Google Cloud Build. Here's how to use it:
+## Deploy to Cloud Run
 
-1. **Set up Artifact Registry:**
-   Create a Docker repository in Artifact Registry:
+The repository offers two deployment paths. Both deploy the same application.
+
+### Deploy from source with setup.sh
+
+`setup.sh` enables the required APIs, creates a Cloud Storage bucket, creates an
+Artifact Registry repository named `dev-lifecycle`, and deploys a Cloud Run
+service named `dev-lifecycle` from source with `DEMO_ASSETS_BUCKET` set to the
+new bucket. No demo reads that variable, so the bucket stays empty.
+
+1. Edit `setup.sh` and replace `YOUR_PROJECT_ID` and `YOUR_REGION` with your
+   project ID and region.
+
+1. Run the script:
+
    ```bash
-   gcloud artifacts repositories create dev-lifecycle --repository-format=docker --location=us-central1 --description="Gemini Developer Lifecycle Demo"
+   bash setup.sh
    ```
 
-2. **Trigger a build:**
-   Submit a build to Cloud Build:
+### Deploy with Cloud Build
+
+1. Create the Artifact Registry repository that `cloudbuild.yaml` expects:
+
+   ```bash
+   gcloud artifacts repositories create gemini-dev-demos --repository-format=docker --location=us-central1 --description="Gemini developer lifecycle demos"
+   ```
+
+1. Submit the build:
+
    ```bash
    gcloud builds submit . --config=./cloudbuild.yaml --substitutions SHORT_SHA=1.0
    ```
 
-3. **Customizing the build:**
-   The `cloudbuild.yaml` file defines the following steps:
-   - Install Python dependencies
-   - Build a Docker image
-   - Push the image to Artifact Registry
-   - Deploy the image to Cloud Run
+`cloudbuild.yaml` installs the dependencies, builds the image, pushes it to
+Artifact Registry, and deploys it to Cloud Run with `--allow-unauthenticated`
+and with `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, and
+`GOOGLE_GENAI_USE_VERTEXAI` set on the service.
 
-   You can customize the build by modifying the `cloudbuild.yaml` file. Key substitution variables include:
-   - `_ARTIFACT_REGISTRY_REPO`: Name of your Artifact Registry repository
-   - `_REPO_LOCATION`: Location of your Artifact Registry
-   - `_SERVICE_NAME`: Name of your Cloud Run service
-   - `_SERVICE_REGION`: Region for your Cloud Run service
+Override these substitution variables to change the target:
 
-4. **Environment Variables:**
-   The Cloud Run deployment step sets the following environment variables:
-   - `GCP_PROJECT`: Set to your project ID
-   - `GCP_REGION`: Set to the specified service region
+| Substitution | Default | Purpose |
+| --- | --- | --- |
+| `_ARTIFACT_REGISTRY_REPO` | `gemini-dev-demos` | Artifact Registry repository name. |
+| `_REPO_LOCATION` | `us-central1` | Artifact Registry location. |
+| `_SERVICE_NAME` | `gemini-re-demos` | Cloud Run service name and image name. |
+| `_SERVICE_REGION` | `us-central1` | Cloud Run region. |
 
-Ensure you have the necessary permissions in your Google Cloud project to use Cloud Build, Artifact Registry, and Cloud Run.
+Cloud Build also requires `SHORT_SHA`, which it populates automatically for
+trigger-driven builds and which you pass yourself for manual builds.
 
-## 🔧 Troubleshooting
+The build step hardcodes the `us-central1` Artifact Registry host, whereas the
+push and deploy steps use `_REPO_LOCATION`. If you change `_REPO_LOCATION`,
+update the build step in `cloudbuild.yaml` as well.
 
-- **API Errors**: Ensure your Google Cloud Project has the necessary APIs enabled and your service account has appropriate permissions.
-- **Model Unavailable**: Check if the selected Gemini model is available in your region. Some models may have limited availability.
-- **Memory Issues**: If encountering out-of-memory errors, try running the demos on a machine with more RAM or reduce the input size for large repositories or videos.
-- **Docker Issues**: Make sure Docker is installed and running on your system. Check Docker logs for any error messages.
-- **Cloud Build Issues**: Verify that you have the correct permissions and that all required APIs are enabled in your Google Cloud project.
+## Verify this README
 
-## 🤝 Contributing
+`check_readme.py` checks this README against the repository: the sections it
+must contain, referenced paths, demo coverage, sidebar labels, model
+identifiers, dated claims, environment variables, packages, deployment
+commands, the license statement, and a set of mechanical style rules. It needs
+no arguments, no network access, and no Google Cloud credentials.
 
-We welcome contributions to improve and expand these demos! Please refer to our [Contribution Guidelines](docs/CONTRIBUTING.md) for detailed information on how to contribute to this project.
+```bash
+python3 check_readme.py
+```
 
-## 🔒 Security
+The script prints one line per check and exits with a non-zero status if any
+check fails. Run it after you change `README.md` or rename anything it
+references.
 
-This project uses Google Cloud services. Ensure that you follow best practices for securing your Google Cloud environment:
+## Troubleshooting
 
-- Use the principle of least privilege when setting up service accounts.
-- Regularly rotate service account keys.
-- Keep your `GOOGLE_APPLICATION_CREDENTIALS` secure and never commit them to version control.
+- **Vertex AI returns a permission or API error.** Confirm that the project
+  named by `GOOGLE_CLOUD_PROJECT` has `aiplatform.googleapis.com` turned on,
+  and that your credentials carry the Vertex AI User role.
+- **The client reports missing credentials or no project.** `get_client()`
+  builds the `google-genai` client on the first call, not at import, so a
+  missing variable surfaces when you press a generate button rather than when
+  the page loads. Run `gcloud auth application-default login`, export
+  `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, and
+  `GOOGLE_GENAI_USE_VERTEXAI`, then restart the server.
+- **A model call returns a not-found error.** Vertex AI serves
+  `gemini-3.8-flash` for a short availability window, and it serves no model
+  in every region. Confirm the identifier against
+  [Gemini model identifiers](#gemini-model-identifiers), then pick a region
+  that carries it.
+- **A repository inspection run exhausts memory.** `apps/repo-inspection.py`
+  loads a whole repository into the prompt. Analyze a smaller repository, or
+  run the app on a machine with more memory.
+- **The container reports the wrong project.** `Dockerfile` bakes in
+  `GOOGLE_CLOUD_PROJECT=my-demo-project-400313`. Override it with
+  `-e GOOGLE_CLOUD_PROJECT` when you run the container, or with
+  `--update-env-vars` when you deploy.
+- **Streamlit reports a session state error.** Click **Reset All** in the
+  sidebar, which clears every key in the session state.
+- **Streamlit warns that it found no static folder.** `.streamlit/config.toml`
+  sets `enableStaticServing`, and the repository ships no `static` directory,
+  so the server prints the warning on every start. Ignore it, or create the
+  directory if you want to serve your own files from it.
 
-## 📄 License
+## Contribute
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+Contributions are welcome. Read the
+[contribution guide](docs/CONTRIBUTING.md) for the Contributor License
+Agreement, the community guidelines, and the pull request process. Run
+`python3 check_readme.py` before you send a change that touches this README.
 
-## 🙏 Acknowledgements
+## Security
 
-- Google Cloud Platform and the Gemini AI team for their cutting-edge AI models
-- Streamlit for their excellent framework for building interactive data applications
-- The open-source community for various libraries and tools used in this project
+- Grant service accounts the smallest set of roles that the demos need.
+- Prefer `gcloud auth application-default login` or an attached service
+  identity over downloaded service account keys.
+- Keep credential files out of the repository directory. `.gitignore`,
+  `.dockerignore`, and `.gcloudignore` each exclude `.env`, and `.gitignore`
+  also excludes `*-credentials.json`, but none of them excludes a service
+  account key saved under another name, so such a key reaches your commits and
+  your build context.
+- Remove `--allow-unauthenticated` from `cloudbuild.yaml` and `setup.sh`, or put
+  the service behind Identity-Aware Proxy, before you expose a deployment beyond
+  a demo audience.
+- Upload only material that you are allowed to send to Vertex AI. The demos
+  forward your uploads, including source code and videos, to the model.
 
----
+## License
 
-For questions, issues, or feature requests, please open an issue in the GitHub repository or contact the maintainers.
+This project is licensed under the Apache License 2.0. For the full text, see
+the [LICENSE](LICENSE) file.

@@ -1,35 +1,19 @@
 import streamlit as st
-import time
-import re
-import vertexai
 import os
 import shutil
 from pathlib import Path
 import git
 import magika
-from vertexai.generative_models import GenerativeModel
-import vertexai.preview.generative_models as generative_models
 import pandas as pd
 
-# Initialize Vertex AI
-PROJECT_ID = os.environ.get('GCP_PROJECT')
-LOCATION = os.environ.get('GCP_REGION')
-vertexai.init(project=PROJECT_ID, location=LOCATION)
+from utils_vertex import MODEL_ID, generation_config, get_client, usage_tokens
 
 # Initialize Magika
 m = magika.Magika()
 
 # Constants
-MODEL_ID = "gemini-1.5-flash-002"
 REPO_DIR = "./repo"
-
-# Safety settings
-safety_settings = {
-    generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_NONE,
-    generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_NONE,
-    generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_NONE,
-    generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_NONE,
-}
+MAX_INPUT_TOKENS = 2000000
 
 st.markdown("""
     <style>
@@ -40,30 +24,26 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-# Initialize Gemini model
-model = GenerativeModel(MODEL_ID, safety_settings=safety_settings)
 
 # Helper functions
 def stream_prompt(input):
-    token_size = model.count_tokens(input)
-    total_tokens = int(re.search(r"total_tokens:\s*(\d+)", str(token_size)).group(1))
-    if total_tokens > 2000000:
-        raise ValueError("Total tokens must be less than 2000000")
+    """Stream one analysis and report the tokens the call consumed.
 
-    billable_characters = int(re.search(r"total_billable_characters:\s*(\d+)", str(token_size)).group(1))
-    cost = (billable_characters / 1000) * 0.0025
+    The retired SDK reported `total_billable_characters`, which this demo
+    turned into a dollar figure with a 2024 per-character price. google-genai
+    reports neither the characters nor a price, so the demo reports the token
+    counts that `usage_metadata` carries once the stream ends.
+    """
+    client = get_client()
+    total_tokens = client.models.count_tokens(model=MODEL_ID, contents=input).total_tokens or 0
+    if total_tokens > MAX_INPUT_TOKENS:
+        raise ValueError(f"Total tokens must be less than {MAX_INPUT_TOKENS}")
 
-    response = model.generate_content(
-        input,
-        generation_config={
-            "max_output_tokens": 8192,
-            "temperature": 0.4,
-            "top_p": 1
-        },
-        safety_settings=safety_settings,
-        stream=True,
+    return client.models.generate_content_stream(
+        model=MODEL_ID,
+        contents=input,
+        config=generation_config(),
     )
-    return response, cost
 
 def get_code_prompt(question, code_index, code_text):
     return f"""
@@ -118,7 +98,7 @@ def extract_code(repo_dir):
 
 st.title("Gemini Repo Inspection")
 st.markdown("""
-This advanced tool uses the Gemini Experimental model to analyze GitHub repositories and provide in-depth insights.
+This advanced tool uses the Gemini model to analyze GitHub repositories and provide in-depth insights.
 The model can handle large codebases but is limited to 1 million tokens.
 Responses are streamed in real-time as they are generated, providing immediate feedback.
 """)
@@ -126,8 +106,8 @@ Responses are streamed in real-time as they are generated, providing immediate f
 # Initialize session state
 if 'analyses' not in st.session_state:
     st.session_state.analyses = []
-if 'costs' not in st.session_state:
-    st.session_state.costs = []
+if 'token_counts' not in st.session_state:
+    st.session_state.token_counts = []
 
 # Two-column layout
 col1, col2 = st.columns([4, 6])
@@ -171,33 +151,42 @@ with col1:
         else:
             question = custom_prompt if selected_analysis == "custom" else analysis_options[selected_analysis]
             prompt = get_code_prompt(question, st.session_state["index"], st.session_state["text"])
-            response, cost = stream_prompt(prompt)
-            
+            response = stream_prompt(prompt)
+
             analysis_container = st.empty()
             full_response = ""
-            
+            tokens = {"prompt": 0, "candidates": 0, "total": 0}
+
             for chunk in response:
                 if chunk.text:
                     full_response += chunk.text
                     analysis_container.markdown(full_response + "▌")
-            
+                # Only the closing chunks carry usage, so keep the last one seen.
+                if getattr(chunk, "usage_metadata", None):
+                    tokens = usage_tokens(chunk)
+
             analysis_container.markdown(full_response)
-            
+
             st.success("Analysis generated successfully!")
             st.session_state.analyses.append((selected_analysis, full_response))
-            st.session_state.costs.append(cost)
+            st.session_state.token_counts.append(tokens)
 
 with col2:
-    # API Costs Table
-    st.header("API Costs", divider="gray")
-    if st.session_state.costs:
-        cost_df = pd.DataFrame({
+    # Token usage table
+    st.header("Token usage", divider="gray")
+    if st.session_state.token_counts:
+        token_df = pd.DataFrame({
             "Analysis": [a[0].capitalize() for a in st.session_state.analyses],
-            "Cost ($)": st.session_state.costs
+            "Input tokens": [t["prompt"] for t in st.session_state.token_counts],
+            "Output tokens": [t["candidates"] for t in st.session_state.token_counts],
+            "Total tokens": [t["total"] for t in st.session_state.token_counts],
         })
-        cost_df["Cumulative Cost ($)"] = cost_df["Cost ($)"].cumsum()
-        st.dataframe(cost_df, use_container_width=True)
-        st.info(f"Total cost: ${sum(st.session_state.costs):.4f}")
+        token_df["Cumulative tokens"] = token_df["Total tokens"].cumsum()
+        st.dataframe(token_df, use_container_width=True)
+        st.info(
+            f"Total tokens this session: {sum(t['total'] for t in st.session_state.token_counts)}. "
+            "Vertex AI prices Gemini per token, so multiply by the rate for this model."
+        )
     else:
         st.info("No analyses performed yet.")
 
@@ -210,5 +199,5 @@ with col2:
     # Clear all analyses
     if st.button("Clear All Analyses"):
         st.session_state.analyses = []
-        st.session_state.costs = []
+        st.session_state.token_counts = []
         st.success("All analyses cleared!")

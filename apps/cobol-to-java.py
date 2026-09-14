@@ -1,16 +1,13 @@
 import streamlit as st
-import os
-import vertexai
-from vertexai.preview.generative_models import GenerativeModel, Part
 
-# Initialize Vertex AI
-PROJECT_ID = os.environ.get("GCP_PROJECT")
-LOCATION = os.environ.get("GCP_REGION")
-vertexai.init(project=PROJECT_ID, location=LOCATION)
+from utils_vertex import MODEL_ID, generation_config, get_client
 
-def get_gemini_response(prompt, model_name="gemini-1.5-pro-001"):
-    model = GenerativeModel(model_name)
-    response = model.generate_content(prompt)
+def get_gemini_response(prompt, model_name=MODEL_ID):
+    response = get_client().models.generate_content(
+        model=model_name,
+        contents=prompt,
+        config=generation_config(),
+    )
     return response.text
 
 st.title("COBOL to Java Migration Demo using Gemini")

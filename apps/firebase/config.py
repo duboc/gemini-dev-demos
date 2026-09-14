@@ -1,18 +1,8 @@
-import os
-import streamlit as st
-import vertexai
-from vertexai.generative_models import GenerativeModel
+from utils_vertex import MODEL_ID
 
-def load_vertex(region):
-    PROJECT_ID = os.environ.get("GCP_PROJECT")
-    LOCATION = os.environ.get(f"{region}")
-    vertexai.init(project=PROJECT_ID, location=LOCATION)
-
-@st.cache_resource
-def load_models(name):
-    text_model_pro = GenerativeModel(name)
-    multimodal_model_pro = GenerativeModel(name)
-    return text_model_pro, multimodal_model_pro
+# The one Gemini model this demo calls. utils_vertex.py owns the identifier so
+# a single edit moves every demo to a new model.
+MODEL_NAMES = [MODEL_ID]
 
 video_uris = {
     "E-commerce (Nike)": "gs://convento-samples/nike-sbf.mp4",

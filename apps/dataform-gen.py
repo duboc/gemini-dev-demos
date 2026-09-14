@@ -170,7 +170,7 @@ def generate_example_questions(schema):
     The questions should be diverse and cover different aspects of the schema.
     Return only the questions, one per line, without any additional text or numbering.
     """
-    response = vertex.sendPrompt(prompt, vertex.model_gemini_pro)
+    response = vertex.sendPrompt(prompt, vertex.MODEL_ID)
     return [q.strip() for q in response.split('\n') if q.strip()]
 
 # Initialize session state variables
@@ -213,9 +213,16 @@ with st.expander("View/Edit Schema"):
 st.subheader("Step 2: Generate Dataform SQL")
 st.write("Example Questions when using the Simple Billing Schema:")
 
-# Generate example questions only if they haven't been generated yet
+# Generate example questions only if they haven't been generated yet. This runs
+# while the page renders, so a credential or configuration problem here would
+# otherwise take down the whole demo before Step 1 appears.
 if not st.session_state.example_questions:
-    st.session_state.example_questions = generate_example_questions(schema)
+    try:
+        st.session_state.example_questions = generate_example_questions(schema)
+    except Exception as error:  # noqa: BLE001 - report anything the SDK raises
+        st.warning(
+            f"Gemini did not answer, so this demo shows no example questions: {error}"
+        )
 
 for question in st.session_state.example_questions:
     st.write("- " + question)
@@ -234,11 +241,11 @@ if st.button("Generate Dataform SQL"):
         * If the question involves filtering by date or time, assume the relevant column exists in the table from the schema provided and is named 'date' or 'timestamp' (choose the most appropriate one based on the schema).    "  
 
         dataform_input = schema + "\n" + dataform_prompt
-        st.session_state.dataform_sql = vertex.sendPrompt(dataform_input, vertex.model_gemini_pro)
+        st.session_state.dataform_sql = vertex.sendPrompt(dataform_input, vertex.MODEL_ID)
 
 if st.session_state.dataform_sql:
     with st.expander("View Generated Dataform SQL"):
-        st.write(st.session_state.dataform_sql, language="sql")
+        st.code(st.session_state.dataform_sql, language="sql")
 
 # Step 3: Terraform Generation
 st.subheader("Step 3: Generate Terraform")
@@ -289,10 +296,10 @@ if st.button("Generate Terraform"):
             
             """
             print(terraform_prompt)
-            terraform_response = vertex.sendPrompt(terraform_prompt, vertex.model_gemini_pro)
+            terraform_response = vertex.sendPrompt(terraform_prompt, vertex.MODEL_ID)
 
             if terraform_response:
                 with st.expander("View Generated Terraform Code"):
-                    st.write(terraform_response, language="hcl")
+                    st.code(terraform_response, language="hcl")
 
 st.info("Note: The generated Dataform SQL and Terraform code are based on AI predictions and may require review and adjustments.")

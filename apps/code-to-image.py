@@ -1,17 +1,7 @@
 import streamlit as st
-import os
-import vertexai
-from vertexai.generative_models import (
-    GenerationConfig,
-    GenerativeModel,
-    HarmBlockThreshold,
-    HarmCategory,
-    Part,
-)
+from google.genai import types
 
-PROJECT_ID = os.environ.get("GCP_PROJECT")
-LOCATION = os.environ.get("GCP_REGION")
-vertexai.init(project=PROJECT_ID, location=LOCATION)
+from utils_vertex import MODEL_ID, generation_config, get_client
 
 st.markdown("""
     <style>
@@ -22,24 +12,17 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-def load_models(name):
-    text_model_pro = GenerativeModel(name)
-    multimodal_model_pro = GenerativeModel(name)
-    return text_model_pro, multimodal_model_pro
 
-def get_gemini_pro_vision_response(
-    model, prompt_list, generation_config={}, stream: bool = True
-):
-    generation_config = {"temperature": 0.1, "max_output_tokens": 8192}
-    responses = model.generate_content(
-        prompt_list, generation_config=generation_config, stream=stream
+def get_gemini_pro_vision_response(model, prompt_list):
+    responses = get_client().models.generate_content_stream(
+        model=model,
+        contents=prompt_list,
+        config=generation_config(temperature=0.1),
     )
     final_response = []
     for response in responses:
-        try:
+        if response.text:
             final_response.append(response.text)
-        except IndexError:
-            pass
     return "".join(final_response)
 
 st.title("Multi-Purpose Image To Action Demo")
@@ -68,12 +51,7 @@ with col1:
     st.subheader("Configuration")
     model_name = st.radio(
         "Select Model:",
-        ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
-        format_func=lambda x: {
-            "gemini-experimental": "Gemini Pro Experimental",
-            "gemini-1.5-pro-001": "Gemini Pro 1.5",
-            "gemini-1.5-flash-001": "Gemini Flash 1.5"
-        }[x],
+        [MODEL_ID],
         horizontal=True
     )
 
@@ -97,15 +75,13 @@ with col1:
 
     st.text_area("Use Case Description", use_case_descriptions[use_case], height=100, disabled=True)
 
-    text_model_pro, multimodal_model_pro = load_models(model_name)
-
     if use_case == "Custom Use Case":
         image_upload = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
         custom_prompt_suggestion = "Analyze this image and provide a detailed description of its contents, focusing on [specific aspect]. Then, suggest potential applications or use cases for this image in the context of [your industry/field]."
         custom_prompt = st.text_area("Enter your custom prompt:", value=custom_prompt_suggestion, height=100)
         if image_upload:
             st.image(image_upload, width=300)
-            image_part = Part.from_bytes(image_upload.getvalue(), mime_type=image_upload.type)
+            image_part = types.Part.from_bytes(data=image_upload.getvalue(), mime_type=image_upload.type)
     else:
         if use_case == "Sprint Planning":
             image_url = "gs://convento-samples/tela-login.png"
@@ -119,7 +95,7 @@ with col1:
             prompt = f"""
             All answers should be provided in {story_lang}.
             Explain this napkin sketch in the format of feature implementation for a user story.
-            The idea is a website for random jokes generated using Vertex AI with the gemini-1.5-flash-001 model.
+            The idea is a website for random jokes generated using Vertex AI with the {MODEL_ID} model.
             This description will be used for development backlog for frontend, backend, and Google Cloud deployment plan.
             """
         else:  # Test Plan Generation
@@ -129,8 +105,8 @@ with col1:
             Explain this login screen in the format of a test plan for a user story.
             This description will be used for development backlog.
             """
-        
-        image_part = Part.from_uri(mime_type="image/png", uri=image_url)
+
+        image_part = types.Part.from_uri(file_uri=image_url, mime_type="image/png")
         st.image("https://storage.googleapis.com/" + image_url.split("gs://")[1], width=300)
 
 with col2:
@@ -142,9 +118,9 @@ with col2:
                 if not image_upload or not custom_prompt:
                     st.error("Please upload an image and enter a custom prompt.")
                 else:
-                    response = get_gemini_pro_vision_response(multimodal_model_pro, [custom_prompt, image_part])
+                    response = get_gemini_pro_vision_response(model_name, [custom_prompt, image_part])
             else:
-                response = get_gemini_pro_vision_response(multimodal_model_pro, [prompt, image_part])
+                response = get_gemini_pro_vision_response(model_name, [prompt, image_part])
             
             if 'response' in locals():
                 st.session_state['initial_description'] = response
@@ -163,7 +139,7 @@ with col2:
                     Generated description:
                     {st.session_state['initial_description']}
                     """
-                    backend_response = get_gemini_pro_vision_response(multimodal_model_pro, [backend_prompt, image_part])
+                    backend_response = get_gemini_pro_vision_response(model_name, [backend_prompt, image_part])
                     st.session_state['backend_code'] = backend_response
                     st.session_state.button_states['backend_code'] = True
 
@@ -179,7 +155,7 @@ with col2:
                         Backend code:
                         {st.session_state['backend_code']}
                         """
-                        frontend_response = get_gemini_pro_vision_response(multimodal_model_pro, [frontend_prompt, image_part])
+                        frontend_response = get_gemini_pro_vision_response(model_name, [frontend_prompt, image_part])
                         st.session_state['frontend_code'] = frontend_response
                         st.session_state.button_states['frontend_code'] = True
 
@@ -199,7 +175,7 @@ with col2:
                         Frontend code:
                         {st.session_state['frontend_code']}
                         """
-                        gcloud_response = get_gemini_pro_vision_response(multimodal_model_pro, [gcloud_prompt, image_part])
+                        gcloud_response = get_gemini_pro_vision_response(model_name, [gcloud_prompt, image_part])
                         st.session_state['gcloud_code'] = gcloud_response
                         st.session_state.button_states['gcloud_code'] = True
 
@@ -216,7 +192,7 @@ with col2:
                     Generated description:
                     {st.session_state['initial_description']}
                     """
-                    test_case_response = get_gemini_pro_vision_response(multimodal_model_pro, [test_case_prompt, image_part])
+                    test_case_response = get_gemini_pro_vision_response(model_name, [test_case_prompt, image_part])
                     st.session_state['test_cases'] = test_case_response
                     st.session_state.button_states['test_cases'] = True
 
@@ -232,7 +208,7 @@ with col2:
                         Test plan:
                         {st.session_state['test_cases']}
                         """
-                        script_response = get_gemini_pro_vision_response(multimodal_model_pro, [script_prompt, image_part])
+                        script_response = get_gemini_pro_vision_response(model_name, [script_prompt, image_part])
                         st.session_state['test_script'] = script_response
                         st.session_state.button_states['test_script'] = True
 
@@ -248,7 +224,7 @@ with col2:
                         Test plan:
                         {st.session_state['test_cases']}
                         """
-                        selenium_response = get_gemini_pro_vision_response(multimodal_model_pro, [selenium_prompt, image_part])
+                        selenium_response = get_gemini_pro_vision_response(model_name, [selenium_prompt, image_part])
                         st.session_state['selenium_script'] = selenium_response
                         st.session_state.button_states['selenium_script'] = True
 

@@ -1,4 +1,5 @@
 import streamlit as st
+from apps.firebase.config import MODEL_NAMES
 from apps.firebase.generation import generate_video_description, generate_robo_script, generate_test_execution_script
 
 def render_custom_css():
@@ -68,7 +69,7 @@ def render_config_section():
             
             model_name = st.radio(
                 "Select Model:",
-                ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
+                MODEL_NAMES,
                 key="model_name",
                 index=0
             )
@@ -95,7 +96,7 @@ def render_config_section():
     
     return model_region, model_name, language, use_case
 
-def render_video_analysis_section(video_url, use_case, language, selected_video_uri, multimodal_model_pro):
+def render_video_analysis_section(video_url, use_case, language, selected_video_uri, region, model):
     st.header("🎥 Video Analysis and Results")
     
     col1, col2 = st.columns([1, 2])
@@ -127,16 +128,16 @@ def render_video_analysis_section(video_url, use_case, language, selected_video_
         tab1, tab2, tab3 = st.tabs(["📝 Video Description", "🔧 Robo Script", "🚀 Test Execution"])
         
         with tab1:
-            generate_video_description(use_case, language, selected_video_uri, multimodal_model_pro)
+            generate_video_description(use_case, language, selected_video_uri, region, model)
             if st.session_state.get('video_description'):
                 st.markdown(st.session_state['video_description'])
         
         with tab2:
-            generate_robo_script(use_case, language, selected_video_uri, multimodal_model_pro)
+            generate_robo_script(use_case, language, selected_video_uri, region, model)
             if st.session_state.get('robo_script'):
                 st.write(st.session_state['robo_script'])
         
         with tab3:
-            generate_test_execution_script(use_case, language, multimodal_model_pro)
+            generate_test_execution_script(use_case, language, region, model)
             if st.session_state.get('test_execution_script'):
                 st.code(st.session_state['test_execution_script'], language="bash")

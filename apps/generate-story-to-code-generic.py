@@ -1,14 +1,6 @@
 import streamlit as st
-from utils_vertex import sendPrompt, model_experimental, model_gemini_pro_15, model_gemini_flash
+from utils_vertex import MODEL_ID, sendPrompt
 from utils_streamlit import reset_st_state
-
-def load_models(model_name):
-    if model_name == "gemini-experimental":
-        return model_experimental
-    elif model_name == "gemini-1.5-pro-001":
-        return model_gemini_pro_15
-    else:
-        return model_gemini_flash
 
 def load_questions(file_path):
     try:
@@ -62,14 +54,13 @@ with col1:
     st.subheader("Configuration")
     model_name = st.radio(
         "Model:",
-        ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
-        captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
+        [MODEL_ID],
         key="model_name",
         index=0,
         horizontal=True
     )
 
-    model = load_models(model_name)
+    model = model_name
 
     selected_category = st.radio(
         "Select Industry:",

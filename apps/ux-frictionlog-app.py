@@ -1,13 +1,7 @@
 import streamlit as st
-import os
-import vertexai
-from vertexai.generative_models import (
-    GenerationConfig,
-    GenerativeModel,
-    HarmBlockThreshold,
-    HarmCategory,
-    Part,
-)
+from google.genai import types
+
+from utils_vertex import MODEL_ID, generation_config, get_client
 
 
 # Custom CSS to resize video, style tabs, and improve button appearance
@@ -44,30 +38,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def load_vertex(region):
-    PROJECT_ID = os.environ.get("GCP_PROJECT")
-    LOCATION = os.environ.get(f"{region}")
-    vertexai.init(project=PROJECT_ID, location=LOCATION)
+def get_gemini_pro_response(region, model, prompt):
+    response = get_client(region).models.generate_content_stream(
+        model=model,
+        contents=prompt,
+        config=generation_config(temperature=0.1),
+    )
 
-@st.cache_resource
-def load_models(name):
-    text_model_pro = GenerativeModel(name)
-    multimodal_model_pro = GenerativeModel(name)
-    return text_model_pro, multimodal_model_pro
-
-def get_gemini_pro_response(model, prompt, generation_config={}, stream=True):
-    generation_config = {"temperature": 0.1, "max_output_tokens": 8192}
-    response = model.generate_content(prompt, generation_config=generation_config, stream=stream)
-    
-    if stream:
-        full_response = []
-        for chunk in response:
-            if chunk.text:
-                full_response.append(chunk.text)
-                yield chunk.text
-        return "".join(full_response)
-    else:
-        return response.text
+    for chunk in response:
+        if chunk.text:
+            yield chunk.text
 
 # Initialize session state variables
 if 'friction_log' not in st.session_state:
@@ -101,7 +81,7 @@ with col1:
     
     model_name = st.radio(
         "Select Model:",
-        ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
+        [MODEL_ID],
         key="model_name",
         index=0
     )
@@ -119,10 +99,7 @@ with col2:
         key="use_case"
     )
 
-# Load models and video
-load_vertex(model_region)
-text_model_pro, multimodal_model_pro = load_models(model_name)
-
+# Video for the selected use case
 video_uris = {
     "E-commerce (Nike)": "gs://convento-samples/nike-sbf.mp4",
     "Pharmacy (Raia)": "gs://convento-samples/raia.mp4",
@@ -179,10 +156,10 @@ if st.button("Generate Analysis", key="generate_analysis", disabled=st.session_s
     st.session_state['user_story_status'] = "Running"
     
     with st.spinner("Generating Friction Log..."):
-        video_part = Part.from_uri(selected_video_uri, mime_type="video/mp4")
+        video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
         friction_response = ""
         friction_placeholder = st.empty()
-        for chunk in get_gemini_pro_response(multimodal_model_pro, [friction_prompt, video_part]):
+        for chunk in get_gemini_pro_response(model_region, model_name, [friction_prompt, video_part]):
             friction_response += chunk
             friction_placeholder.markdown(friction_response)
         st.session_state['friction_log'] = friction_response
@@ -191,7 +168,7 @@ if st.button("Generate Analysis", key="generate_analysis", disabled=st.session_s
     with st.spinner("Generating User Story..."):
         user_story_response = ""
         user_story_placeholder = st.empty()
-        for chunk in get_gemini_pro_response(text_model_pro, user_story_prompt + "\n" + friction_response):
+        for chunk in get_gemini_pro_response(model_region, model_name, user_story_prompt + "\n" + friction_response):
             user_story_response += chunk
             user_story_placeholder.markdown(user_story_response)
         st.session_state['user_story'] = user_story_response

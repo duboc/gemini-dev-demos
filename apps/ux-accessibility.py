@@ -1,31 +1,13 @@
 import streamlit as st
-import os
-import vertexai
-from vertexai.generative_models import (
-    GenerationConfig,
-    GenerativeModel,
-    HarmBlockThreshold,
-    HarmCategory,
-    Part,
-)
+from google.genai import types
 
-def load_vertex(region):
-    PROJECT_ID = os.environ.get("GCP_PROJECT")
-    LOCATION = os.environ.get(f"{region}")
-    vertexai.init(project=PROJECT_ID, location=LOCATION)
+from utils_vertex import MODEL_ID, generation_config, get_client
 
-@st.cache_resource
-def load_models(name):
-    text_model_pro = GenerativeModel(name)
-    multimodal_model_pro = GenerativeModel(name)
-    return text_model_pro, multimodal_model_pro
-
-def get_gemini_pro_vision_response_stream(
-    model, prompt_list, generation_config={}, stream: bool = True
-):
-    generation_config = {"temperature": 0.1, "max_output_tokens": 8192}
-    return model.generate_content(
-        prompt_list, generation_config=generation_config, stream=stream
+def get_gemini_pro_vision_response_stream(region, model, prompt_list):
+    return get_client(region).models.generate_content_stream(
+        model=model,
+        contents=prompt_list,
+        config=generation_config(temperature=0.1),
     )
 
 st.markdown("""
@@ -59,11 +41,9 @@ with col1:
         key="model_region",
     )
 
-    load_vertex(model_region)
-
     model_name = st.radio(
         "Select Model:",
-        ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
+        [MODEL_ID],
         key="model_name",
         horizontal=True,
         index=0,
@@ -81,8 +61,6 @@ with col1:
         ["Retail (Nike)", "Pharmacy (Raia)"],
         key="use_case",
     )
-
-    text_model_pro, multimodal_model_pro = load_models(model_name)
 
     if use_case == "Retail (Nike)":
         video_uri = "gs://convento-samples/nike-sbf.mp4"
@@ -117,12 +95,12 @@ with col2:
 
             Follow with a concise summary of overall WCAG compliance strengths and weaknesses, and specific, actionable recommendations for improvement.
             """
-            video_part = Part.from_uri(video_uri, mime_type="video/mp4")
-            wcag_response_stream = get_gemini_pro_vision_response_stream(multimodal_model_pro, [prompt_wcag, video_part])
+            video_part = types.Part.from_uri(file_uri=video_uri, mime_type="video/mp4")
+            wcag_response_stream = get_gemini_pro_vision_response_stream(model_region, model_name, [prompt_wcag, video_part])
             
             full_response = ""
             for chunk in wcag_response_stream:
-                full_response += chunk.text
+                full_response += chunk.text or ""
                 wcag_analysis_placeholder.markdown(full_response)
             
             st.session_state["wcag_analysis"] = full_response
@@ -145,10 +123,10 @@ with col2:
                 Priority | User Story | WCAG Guideline | Details (including issue and recommendation)
                 """
                 prompt_user_story += "\n" + st.session_state["wcag_analysis"]
-                video_part = Part.from_uri(video_uri, mime_type="video/mp4")
-                user_story_response_stream = get_gemini_pro_vision_response_stream(multimodal_model_pro, [prompt_user_story, video_part])
+                video_part = types.Part.from_uri(file_uri=video_uri, mime_type="video/mp4")
+                user_story_response_stream = get_gemini_pro_vision_response_stream(model_region, model_name, [prompt_user_story, video_part])
                 
                 full_response = ""
                 for chunk in user_story_response_stream:
-                    full_response += chunk.text
+                    full_response += chunk.text or ""
                     user_story_placeholder.markdown(full_response)

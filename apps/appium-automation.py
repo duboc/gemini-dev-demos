@@ -1,13 +1,7 @@
 import streamlit as st
-import os
-import vertexai
-from vertexai.generative_models import (
-    GenerationConfig,
-    GenerativeModel,
-    HarmBlockThreshold,
-    HarmCategory,
-    Part,
-)
+from google.genai import types
+
+from utils_vertex import MODEL_ID, generation_config, get_client
 
 # Custom CSS to resize video, style tabs, and improve button appearance
 st.markdown("""
@@ -44,27 +38,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def load_vertex(region):
-    PROJECT_ID = os.environ.get("GCP_PROJECT")
-    LOCATION = os.environ.get(f"{region}")
-    vertexai.init(project=PROJECT_ID, location=LOCATION)
+def get_gemini_pro_response(region, model, prompt):
+    response = get_client(region).models.generate_content_stream(
+        model=model,
+        contents=prompt,
+        config=generation_config(temperature=0.1),
+    )
 
-@st.cache_resource
-def load_models(name):
-    text_model_pro = GenerativeModel(name)
-    multimodal_model_pro = GenerativeModel(name)
-    return text_model_pro, multimodal_model_pro
-
-def get_gemini_pro_response(model, prompt, generation_config={}):
-    generation_config = {"temperature": 0.1, "max_output_tokens": 8192}
-    response = model.generate_content(prompt, generation_config=generation_config, stream=True)
-    
-    full_response = []
     for chunk in response:
         if chunk.text:
-            full_response.append(chunk.text)
             yield chunk.text
-    return "".join(full_response)
 
 # Initialize session state variables
 if 'appium_script' not in st.session_state:
@@ -106,7 +89,7 @@ with col1:
     
     model_name = st.radio(
         "Select Model:",
-        ["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
+        [MODEL_ID],
         key="model_name",
         index=0
     )
@@ -124,10 +107,7 @@ with col2:
         key="use_case"
     )
 
-# Load models and video
-load_vertex(model_region)
-text_model_pro, multimodal_model_pro = load_models(model_name)
-
+# Video for the selected use case
 video_uris = {
     "E-commerce (Nike)": "gs://convento-samples/nike-sbf.mp4",
     "Pharmacy (Raia)": "gs://convento-samples/raia.mp4",
@@ -173,10 +153,10 @@ with col2:
         """
         
         with st.spinner("Generating Video Description..."):
-            video_part = Part.from_uri(selected_video_uri, mime_type="video/mp4")
+            video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
             video_description_placeholder = st.empty()
             video_description_response = ""
-            for chunk in get_gemini_pro_response(multimodal_model_pro, [video_description_prompt, video_part]):
+            for chunk in get_gemini_pro_response(model_region, model_name, [video_description_prompt, video_part]):
                 video_description_response += chunk
                 video_description_placeholder.markdown(video_description_response)
             st.session_state['video_description'] = video_description_response
@@ -266,10 +246,10 @@ with col2:
         """
         
         with st.spinner("Generating Appium Script..."):
-            video_part = Part.from_uri(selected_video_uri, mime_type="video/mp4")
+            video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
             appium_script_placeholder = st.empty()
             appium_script_response = ""
-            for chunk in get_gemini_pro_response(multimodal_model_pro, [appium_script_prompt, video_part]):
+            for chunk in get_gemini_pro_response(model_region, model_name, [appium_script_prompt, video_part]):
                 appium_script_response += chunk
                 appium_script_placeholder.markdown(appium_script_response)
             st.session_state['appium_script'] = appium_script_response

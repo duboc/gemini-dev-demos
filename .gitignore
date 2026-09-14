@@ -162,6 +162,9 @@ cython_debug/
 # VS Code
 .vscode/
 
+# Agent scaffolding and working notes
+.agents/
+
 # Exclude repo and files directories
 /repo
 /files

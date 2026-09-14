@@ -18,7 +18,7 @@ steps:
     args: ['gcloud', 'run', 'deploy', '${_SERVICE_NAME}', 
            '--image=${_REPO_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${SHORT_SHA}', 
            '--region', '${_SERVICE_REGION}', '--platform', 'managed', 
-           '--update-env-vars=GCP_PROJECT=${PROJECT_ID},GCP_REGION=${_SERVICE_REGION}', 
+           '--update-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${_SERVICE_REGION},GOOGLE_GENAI_USE_VERTEXAI=true', 
            '--allow-unauthenticated']
 
 substitutions:

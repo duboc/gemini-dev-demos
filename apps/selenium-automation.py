@@ -1,17 +1,13 @@
 import streamlit as st
-import vertexai
-from vertexai.generative_models import GenerativeModel, Part, GenerationConfig, HarmCategory, HarmBlockThreshold
-import os
-from utils_streamlit import reset_st_state
+from google.genai import types
 
-PROJECT_ID = os.environ.get("GCP_PROJECT")
-LOCATION = os.environ.get("GCP_REGION")
-vertexai.init(project=PROJECT_ID, location=LOCATION)
+from utils_streamlit import reset_st_state
+from utils_vertex import MODEL_ID, generation_config, get_client
 
 if 'response' not in st.session_state:
     st.session_state['response'] = 'init'
-if 'api_costs' not in st.session_state:
-    st.session_state['api_costs'] = []
+if 'token_totals' not in st.session_state:
+    st.session_state['token_totals'] = []
 if 'session_analyses' not in st.session_state:
     st.session_state['session_analyses'] = []
 
@@ -24,45 +20,34 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-@st.cache_resource
-def load_models(name):
-    text_model_pro = GenerativeModel(name)
-    multimodal_model_pro = GenerativeModel(name)
-    return text_model_pro, multimodal_model_pro
 
-def get_gemini_pro_vision_response(model, prompt_list, generation_config={}, stream=True):
-    generation_config = {"temperature": 0.1, "max_output_tokens": 2048}
-    responses = model.generate_content(
-        prompt_list, generation_config=generation_config, stream=stream
+def get_gemini_pro_vision_response(model, prompt_list):
+    responses = get_client().models.generate_content_stream(
+        model=model,
+        contents=prompt_list,
+        config=generation_config(temperature=0.1, max_output_tokens=2048),
     )
     final_response = []
     for response in responses:
-        try:
+        if response.text:
             final_response.append(response.text)
-        except IndexError:
-            pass
     return "".join(final_response)
 
 def count_tokens(model, text):
-    response = model.count_tokens(text)
-    return response.total_tokens, response.total_billable_characters
+    """Return the token count for a prompt or an answer.
 
-def calculate_cost(model_name, input_chars, output_chars, video_duration=0):
-    if model_name == "gemini-1.5-flash-001":
-        input_cost = (input_chars / 1000) * 0.00001875
-        output_cost = (output_chars / 1000) * 0.000075
-        video_cost = video_duration * 0.00002
-    else:  # gemini-1.5-pro-001 or gemini-experimental
-        input_cost = (input_chars / 1000) * 0.00125
-        output_cost = (output_chars / 1000) * 0.00375
-        video_cost = video_duration * 0.001315
-    
-    return input_cost + output_cost + video_cost
+    The retired SDK also returned `total_billable_characters`, and this demo
+    priced the run from it. google-genai reports only tokens, and Vertex AI
+    publishes no per-character price, so the demo reports tokens and leaves the
+    arithmetic to https://cloud.google.com/vertex-ai/generative-ai/pricing
+    """
+    response = get_client().models.count_tokens(model=model, contents=text)
+    return response.total_tokens or 0
 
-def update_session_analysis(action, cost):
+def update_session_analysis(action, tokens):
     st.session_state['session_analyses'].append({
         "Action": action,
-        "Cost": f"${cost:.6f}"
+        "Tokens": tokens
     })
 
 st.header("Generate Selenium Test from Video", divider="rainbow")
@@ -84,8 +69,7 @@ with col1:
 
     model_name = st.radio(
         label="Model:",
-        options=["gemini-experimental", "gemini-1.5-pro-001", "gemini-1.5-flash-001"],
-        captions=["Gemini Pro Experimental", "Gemini Pro 1.5", "Gemini Flash 1.5"],
+        options=[MODEL_ID],
         key="model_name",
         index=0,
         horizontal=True
@@ -97,8 +81,6 @@ with col1:
         key="story_lang",
         horizontal=True,
     )
-
-    text_model_pro, multimodal_model_pro = load_models(model_name)
 
     vide_desc_uri = "gs://convento-samples/boa-selenium-rag.mov"
     video_desc_url = ("https://storage.googleapis.com/" + vide_desc_uri.split("gs://")[1])
@@ -113,13 +95,12 @@ with col1:
     Provide the description in {story_lang}.
     """
 
-    vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
+    vide_desc_img = types.Part.from_uri(file_uri=vide_desc_uri, mime_type="video/mp4")
 
 with col2:
-    # API Costs Session at the top right
-    st.subheader("API Costs Session")
-    total_session_cost = sum(st.session_state['api_costs'])
-    st.metric("Total Session Cost", f"${total_session_cost:.6f}")
+    # Session token usage at the top right
+    st.subheader("Session token usage")
+    st.metric("Total tokens this session", sum(st.session_state['token_totals']))
 
     # Session Analyses
     st.subheader("Session Analyses")
@@ -133,39 +114,31 @@ with col2:
 
     if vide_desc_description and prompt:
         with st.spinner("Analyzing video and generating description..."):
-            response = get_gemini_pro_vision_response(multimodal_model_pro, [prompt, vide_desc_img])
+            response = get_gemini_pro_vision_response(model_name, [prompt, vide_desc_img])
             st.session_state["response"] = response
 
-            # Calculate and update costs for video description generation
-            input_tokens, input_chars = count_tokens(text_model_pro, prompt)
-            output_tokens, output_chars = count_tokens(text_model_pro, response)
-            video_duration = 60  # Assuming the video is 60 seconds long. Adjust as needed.
-            total_cost = calculate_cost(model_name, input_chars, output_chars, video_duration)
-            st.session_state['api_costs'].append(total_cost)
-            update_session_analysis("Generate Description", total_cost)
+            # Record the tokens this generation consumed
+            input_tokens = count_tokens(model_name, prompt)
+            output_tokens = count_tokens(model_name, response)
+            st.session_state['token_totals'].append(input_tokens + output_tokens)
+            update_session_analysis("Generate Description", input_tokens + output_tokens)
 
     if st.session_state["response"] != "init":
-        st.subheader("Token Usage and Cost")
-        
-        input_tokens, input_chars = count_tokens(text_model_pro, prompt)
-        output_tokens, output_chars = count_tokens(text_model_pro, st.session_state["response"])
-        
-        video_duration = 60  # Assuming the video is 60 seconds long. Adjust as needed.
-        total_cost = calculate_cost(model_name, input_chars, output_chars, video_duration)
-        
+        st.subheader("Token usage")
+
+        input_tokens = count_tokens(model_name, prompt)
+        output_tokens = count_tokens(model_name, st.session_state["response"])
+
         token_data = {
-            "Metric": ["Input", "Output", "Total", "API Cost"],
-            "Tokens": [input_tokens, output_tokens, input_tokens + output_tokens, ""],
-            "Characters": [input_chars, output_chars, input_chars + output_chars, ""],
-            "Cost ($)": [
-                calculate_cost(model_name, input_chars, 0, video_duration),
-                calculate_cost(model_name, 0, output_chars, 0),
-                total_cost,
-                total_cost
-            ]
+            "Metric": ["Input", "Output", "Total"],
+            "Tokens": [input_tokens, output_tokens, input_tokens + output_tokens],
         }
-        
+
         st.table(token_data)
+        st.caption(
+            "Vertex AI prices Gemini per token. For the rate that applies to "
+            "this model, read the Vertex AI pricing page."
+        )
 
         with st.expander("Video Description", expanded=True):
             st.markdown(st.session_state["response"])
@@ -177,14 +150,15 @@ with col2:
 
                 {st.session_state["response"]}
                 """
-                selenium_response = get_gemini_pro_vision_response(multimodal_model_pro, [prompt_selenium, vide_desc_img])
-                
+                selenium_response = get_gemini_pro_vision_response(model_name, [prompt_selenium, vide_desc_img])
+
                 with st.expander("Selenium Script", expanded=True):
                     st.code(selenium_response, language="python")
-                
-                # Calculate and update costs for Selenium script generation
-                input_tokens, input_chars = count_tokens(text_model_pro, prompt_selenium)
-                output_tokens, output_chars = count_tokens(text_model_pro, selenium_response)
-                selenium_cost = calculate_cost(model_name, input_chars, output_chars, 0)
-                st.session_state['api_costs'].append(selenium_cost)
-                update_session_analysis("Generate Selenium Script", selenium_cost)
+
+                # Record the tokens the Selenium generation consumed
+                script_tokens = (
+                    count_tokens(model_name, prompt_selenium)
+                    + count_tokens(model_name, selenium_response)
+                )
+                st.session_state['token_totals'].append(script_tokens)
+                update_session_analysis("Generate Selenium Script", script_tokens)
