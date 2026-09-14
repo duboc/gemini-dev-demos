@@ -3,7 +3,7 @@ GitPython==3.1.62
 google-genai
 langchain
 langchain_community
-magika==0.5.1
+magika==1.0.3
 pandas
 Requests
 streamlit
