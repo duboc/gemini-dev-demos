@@ -10,7 +10,7 @@ streamlit
 tiktoken==0.6.0
 # magika depends on tqdm, and its own floor (>=4.66.2) admits the version that
 # CVE-2024-34062 covers. This floor stops a reinstall from keeping it.
-tqdm>=4.66.3
+tqdm>=4.70.1
 wget==3.2
 youtube_transcript_api==0.6.2
 google-cloud-secret-manager
