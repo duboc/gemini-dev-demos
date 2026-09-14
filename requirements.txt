@@ -12,6 +12,6 @@ tiktoken==0.6.0
 # CVE-2024-34062 covers. This floor stops a reinstall from keeping it.
 tqdm>=4.66.3
 wget==3.2
-youtube_transcript_api==0.6.2
+youtube_transcript_api==1.2.4
 google-cloud-secret-manager
 faiss-cpu
