@@ -1,10 +1,10 @@
 import streamlit as st
 from google.genai import types
 
-from utils_vertex import MODEL_ID, generation_config, get_client
+from utils_vertex import LOCATION_NOTE, MODEL_ID, generation_config, get_client
 
-def get_gemini_pro_vision_response(region, model, prompt_list):
-    responses = get_client(region).models.generate_content_stream(
+def get_gemini_pro_vision_response(model, prompt_list):
+    responses = get_client().models.generate_content_stream(
         model=model,
         contents=prompt_list,
         config=generation_config(temperature=0.1),
@@ -36,7 +36,7 @@ This demo showcases the power of Gemini AI in analyzing user experience (UX) bas
 By examining video recordings of user interactions with mobile apps, we can identify usability issues and suggest improvements.
 
 **How it works:**
-1. Select your preferences (model, region, language, and use case).
+1. Select your preferences (model, language, and use case).
 2. Generate a UX Friction Log based on the selected video.
 3. Create User Stories from the Friction Log to prioritize improvements.
 
@@ -56,11 +56,7 @@ if 'user_stories_state' not in st.session_state:
 col1, col2, col3 = st.columns([1, 1, 1])
 
 with col1:
-    model_region = st.selectbox(
-        "Select Gemini region:",
-        ["us-central1", "southamerica-east1", "us-east1", "us-south1", "europe-southwest1"],
-        key="model_region",
-    )
+    st.caption(LOCATION_NOTE)
 
     model_name = st.selectbox(
         "Select Gemini model:",
@@ -136,7 +132,7 @@ with col1:
             prompt = f"All answers should be provided in {story_lang}. {heuristic_prompt}"
             video_part = types.Part.from_uri(file_uri=video_uri, mime_type="video/mp4")
             try:
-                response = get_gemini_pro_vision_response(model_region, model_name, [prompt, video_part])
+                response = get_gemini_pro_vision_response(model_name, [prompt, video_part])
                 st.session_state['friction_log'] = response
                 st.session_state['friction_log_state'] = 'Completed'
             except Exception as e:
@@ -165,7 +161,7 @@ with col2:
                 Rank the user stories based on the severity of the friction points in the log.
                 """
                 try:
-                    user_story_response = get_gemini_pro_vision_response(model_region, model_name, [user_story_prompt, st.session_state['friction_log']])
+                    user_story_response = get_gemini_pro_vision_response(model_name, [user_story_prompt, st.session_state['friction_log']])
                     st.session_state['user_stories'] = user_story_response
                     st.session_state['user_stories_state'] = 'Completed'
                 except Exception as e:

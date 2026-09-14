@@ -1,7 +1,7 @@
 import streamlit as st
 from google.genai import types
 
-from utils_vertex import MODEL_ID, generation_config, get_client
+from utils_vertex import LOCATION_NOTE, MODEL_ID, generation_config, get_client
 
 # Custom CSS to resize video, style tabs, and improve button appearance
 st.markdown("""
@@ -38,8 +38,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def get_gemini_pro_response(region, model, prompt):
-    response = get_client(region).models.generate_content_stream(
+def get_gemini_pro_response(model, prompt):
+    response = get_client().models.generate_content_stream(
         model=model,
         contents=prompt,
         config=generation_config(temperature=0.1),
@@ -81,11 +81,7 @@ st.header("Configuration")
 col1, col2 = st.columns(2)
 
 with col1:
-    model_region = st.selectbox(
-        "Select Gemini region:",
-        ["us-central1", "southamerica-east1", "us-east1", "us-south1", "europe-southwest1"],
-        key="model_region"
-    )
+    st.caption(LOCATION_NOTE)
     
     model_name = st.radio(
         "Select Model:",
@@ -156,7 +152,7 @@ with col2:
             video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
             video_description_placeholder = st.empty()
             video_description_response = ""
-            for chunk in get_gemini_pro_response(model_region, model_name, [video_description_prompt, video_part]):
+            for chunk in get_gemini_pro_response(model_name, [video_description_prompt, video_part]):
                 video_description_response += chunk
                 video_description_placeholder.markdown(video_description_response)
             st.session_state['video_description'] = video_description_response
@@ -249,7 +245,7 @@ with col2:
             video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
             appium_script_placeholder = st.empty()
             appium_script_response = ""
-            for chunk in get_gemini_pro_response(model_region, model_name, [appium_script_prompt, video_part]):
+            for chunk in get_gemini_pro_response(model_name, [appium_script_prompt, video_part]):
                 appium_script_response += chunk
                 appium_script_placeholder.markdown(appium_script_response)
             st.session_state['appium_script'] = appium_script_response

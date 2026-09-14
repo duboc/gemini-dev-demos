@@ -14,11 +14,16 @@ steps:
     args: ['push',  '${_REPO_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${SHORT_SHA}']
   
   # Deploy to Cloud Run
+  #
+  # _SERVICE_REGION places the container. _VERTEX_LOCATION picks the Vertex AI
+  # endpoint the SDK calls. They are separate on purpose: the pinned Gemini 3.x
+  # model is served only on the global endpoint, so a service running in
+  # us-central1 still has to call `global`.
   - name: google/cloud-sdk
     args: ['gcloud', 'run', 'deploy', '${_SERVICE_NAME}', 
            '--image=${_REPO_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REGISTRY_REPO}/${_SERVICE_NAME}:${SHORT_SHA}', 
            '--region', '${_SERVICE_REGION}', '--platform', 'managed', 
-           '--update-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${_SERVICE_REGION},GOOGLE_GENAI_USE_VERTEXAI=true', 
+           '--update-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${_VERTEX_LOCATION},GOOGLE_GENAI_USE_VERTEXAI=true', 
            '--allow-unauthenticated']
 
 substitutions:
@@ -26,6 +31,7 @@ substitutions:
   _REPO_LOCATION: us-central1
   _SERVICE_NAME: gemini-re-demos
   _SERVICE_REGION: us-central1
+  _VERTEX_LOCATION: global
 
 # gcloud artifacts repositories create dev-lifecycle --repository-format=docker --location=us-central1 --description="Gemini Developer Lifecycle Demo"
 # gcloud builds submit . --config=./cloudbuild.yaml --substitutions SHORT_SHA=1.0

@@ -10,8 +10,8 @@ def load_prompt(prompt_name):
     with open(prompt_path, 'r') as file:
         return file.read().strip()
 
-def get_gemini_pro_response(region, model, prompt):
-    response = get_client(region).models.generate_content_stream(
+def get_gemini_pro_response(model, prompt):
+    response = get_client().models.generate_content_stream(
         model=model,
         contents=prompt,
         config=generation_config(temperature=0.1),
@@ -21,7 +21,7 @@ def get_gemini_pro_response(region, model, prompt):
         if chunk.text:
             yield chunk.text
 
-def generate_video_description(use_case, language, selected_video_uri, region, model):
+def generate_video_description(use_case, language, selected_video_uri, model):
     if st.button("Generate Video Description", key="generate_video_description", disabled=st.session_state.get('video_description_status') == "Running"):
         st.session_state['video_description_status'] = "Running"
         
@@ -31,12 +31,12 @@ def generate_video_description(use_case, language, selected_video_uri, region, m
         with st.spinner("Generating Video Description..."):
             video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
             video_description_response = ""
-            for chunk in get_gemini_pro_response(region, model, [video_description_prompt, video_part]):
+            for chunk in get_gemini_pro_response(model, [video_description_prompt, video_part]):
                 video_description_response += chunk
             st.session_state['video_description'] = video_description_response
         st.session_state['video_description_status'] = "Completed"
 
-def generate_robo_script(use_case, language, selected_video_uri, region, model):
+def generate_robo_script(use_case, language, selected_video_uri, model):
     if st.button("Generate Robo Script", key="generate_robo_script", disabled=st.session_state.get('robo_script_status') == "Running"):
         st.session_state['robo_script_status'] = "Running"
         
@@ -55,12 +55,12 @@ def generate_robo_script(use_case, language, selected_video_uri, region, model):
         with st.spinner("Generating Robo Script..."):
             video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
             robo_script_response = ""
-            for chunk in get_gemini_pro_response(region, model, [robo_script_prompt, video_part]):
+            for chunk in get_gemini_pro_response(model, [robo_script_prompt, video_part]):
                 robo_script_response += chunk
             st.session_state['robo_script'] = robo_script_response
         st.session_state['robo_script_status'] = "Completed"
 
-def generate_test_execution_script(use_case, language, region, model):
+def generate_test_execution_script(use_case, language, model):
     if st.button("Generate Test Execution Script", key="generate_test_script", disabled=st.session_state.get('test_script_status') == "Running"):
         st.session_state['test_script_status'] = "Running"
         
@@ -81,7 +81,7 @@ def generate_test_execution_script(use_case, language, region, model):
         
         with st.spinner("Generating Test Execution Script..."):
             test_script_response = ""
-            for chunk in get_gemini_pro_response(region, model, test_script_prompt):
+            for chunk in get_gemini_pro_response(model, test_script_prompt):
                 test_script_response += chunk
             st.session_state['test_execution_script'] = test_script_response
         st.session_state['test_script_status'] = "Completed"

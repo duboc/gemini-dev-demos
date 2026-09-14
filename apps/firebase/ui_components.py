@@ -1,6 +1,7 @@
 import streamlit as st
 from apps.firebase.config import MODEL_NAMES
 from apps.firebase.generation import generate_video_description, generate_robo_script, generate_test_execution_script
+from utils_vertex import LOCATION_NOTE
 
 def render_custom_css():
     st.markdown("""
@@ -61,12 +62,8 @@ def render_config_section():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            model_region = st.selectbox(
-                "Select Gemini region:",
-                ["us-central1", "southamerica-east1", "us-east1", "us-south1", "europe-southwest1"],
-                key="model_region"
-            )
-            
+            st.caption(LOCATION_NOTE)
+
             model_name = st.radio(
                 "Select Model:",
                 MODEL_NAMES,
@@ -94,9 +91,9 @@ def render_config_section():
                     st.session_state[key] = None if key in ['robo_script', 'video_description', 'test_execution_script'] else "Ready"
                 st.rerun()
     
-    return model_region, model_name, language, use_case
+    return model_name, language, use_case
 
-def render_video_analysis_section(video_url, use_case, language, selected_video_uri, region, model):
+def render_video_analysis_section(video_url, use_case, language, selected_video_uri, model):
     st.header("🎥 Video Analysis and Results")
     
     col1, col2 = st.columns([1, 2])
@@ -128,16 +125,16 @@ def render_video_analysis_section(video_url, use_case, language, selected_video_
         tab1, tab2, tab3 = st.tabs(["📝 Video Description", "🔧 Robo Script", "🚀 Test Execution"])
         
         with tab1:
-            generate_video_description(use_case, language, selected_video_uri, region, model)
+            generate_video_description(use_case, language, selected_video_uri, model)
             if st.session_state.get('video_description'):
                 st.markdown(st.session_state['video_description'])
         
         with tab2:
-            generate_robo_script(use_case, language, selected_video_uri, region, model)
+            generate_robo_script(use_case, language, selected_video_uri, model)
             if st.session_state.get('robo_script'):
                 st.write(st.session_state['robo_script'])
         
         with tab3:
-            generate_test_execution_script(use_case, language, region, model)
+            generate_test_execution_script(use_case, language, model)
             if st.session_state.get('test_execution_script'):
                 st.code(st.session_state['test_execution_script'], language="bash")

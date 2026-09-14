@@ -1,7 +1,7 @@
 import streamlit as st
 from google.genai import types
 
-from utils_vertex import MODEL_ID, generation_config, get_client
+from utils_vertex import LOCATION_NOTE, MODEL_ID, generation_config, get_client
 
 
 # Custom CSS to resize video, style tabs, and improve button appearance
@@ -38,8 +38,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def get_gemini_pro_response(region, model, prompt):
-    response = get_client(region).models.generate_content_stream(
+def get_gemini_pro_response(model, prompt):
+    response = get_client().models.generate_content_stream(
         model=model,
         contents=prompt,
         config=generation_config(temperature=0.1),
@@ -73,11 +73,7 @@ st.header("Configuration")
 col1, col2 = st.columns(2)
 
 with col1:
-    model_region = st.selectbox(
-        "Select Gemini region:",
-        ["us-central1", "southamerica-east1", "us-east1", "us-south1", "europe-southwest1"],
-        key="model_region"
-    )
+    st.caption(LOCATION_NOTE)
     
     model_name = st.radio(
         "Select Model:",
@@ -159,7 +155,7 @@ if st.button("Generate Analysis", key="generate_analysis", disabled=st.session_s
         video_part = types.Part.from_uri(file_uri=selected_video_uri, mime_type="video/mp4")
         friction_response = ""
         friction_placeholder = st.empty()
-        for chunk in get_gemini_pro_response(model_region, model_name, [friction_prompt, video_part]):
+        for chunk in get_gemini_pro_response(model_name, [friction_prompt, video_part]):
             friction_response += chunk
             friction_placeholder.markdown(friction_response)
         st.session_state['friction_log'] = friction_response
@@ -168,7 +164,7 @@ if st.button("Generate Analysis", key="generate_analysis", disabled=st.session_s
     with st.spinner("Generating User Story..."):
         user_story_response = ""
         user_story_placeholder = st.empty()
-        for chunk in get_gemini_pro_response(model_region, model_name, user_story_prompt + "\n" + friction_response):
+        for chunk in get_gemini_pro_response(model_name, user_story_prompt + "\n" + friction_response):
             user_story_response += chunk
             user_story_placeholder.markdown(user_story_response)
         st.session_state['user_story'] = user_story_response

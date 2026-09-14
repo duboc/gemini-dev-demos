@@ -1,10 +1,10 @@
 import streamlit as st
 from google.genai import types
 
-from utils_vertex import MODEL_ID, generation_config, get_client
+from utils_vertex import LOCATION_NOTE, MODEL_ID, generation_config, get_client
 
-def get_gemini_pro_vision_response_stream(region, model, prompt_list):
-    return get_client(region).models.generate_content_stream(
+def get_gemini_pro_vision_response_stream(model, prompt_list):
+    return get_client().models.generate_content_stream(
         model=model,
         contents=prompt_list,
         config=generation_config(temperature=0.1),
@@ -35,11 +35,7 @@ It identifies areas for improvement to enhance user interaction and ensure compl
 col1, col2 = st.columns([2, 3])
 
 with col1:
-    model_region = st.selectbox(
-        "Select Gemini region:",
-        ["us-central1", "southamerica-east1", "us-east1", "us-south1", "europe-southwest1"],
-        key="model_region",
-    )
+    st.caption(LOCATION_NOTE)
 
     model_name = st.radio(
         "Select Model:",
@@ -96,7 +92,7 @@ with col2:
             Follow with a concise summary of overall WCAG compliance strengths and weaknesses, and specific, actionable recommendations for improvement.
             """
             video_part = types.Part.from_uri(file_uri=video_uri, mime_type="video/mp4")
-            wcag_response_stream = get_gemini_pro_vision_response_stream(model_region, model_name, [prompt_wcag, video_part])
+            wcag_response_stream = get_gemini_pro_vision_response_stream(model_name, [prompt_wcag, video_part])
             
             full_response = ""
             for chunk in wcag_response_stream:
@@ -124,7 +120,7 @@ with col2:
                 """
                 prompt_user_story += "\n" + st.session_state["wcag_analysis"]
                 video_part = types.Part.from_uri(file_uri=video_uri, mime_type="video/mp4")
-                user_story_response_stream = get_gemini_pro_vision_response_stream(model_region, model_name, [prompt_user_story, video_part])
+                user_story_response_stream = get_gemini_pro_vision_response_stream(model_name, [prompt_user_story, video_part])
                 
                 full_response = ""
                 for chunk in user_story_response_stream:

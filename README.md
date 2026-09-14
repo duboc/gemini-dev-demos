@@ -75,6 +75,16 @@ that send a video or an image. That is a change from the earlier layout, where
 three. Those objects, and the image generation and multimodal embedding models
 that sat beside them, are gone.
 
+Vertex AI serves that model only on the `global` endpoint. A run against a
+live project sent one generation call per endpoint and got an answer from
+`global` and a 404 from `us-central1`, `us-east5`, `southamerica-east1`,
+`us-east1`, `us-south1`, and `europe-southwest1`. Every other Gemini 3.x flash
+identifier behaved the same way, and only the previous model generation, which
+this repository does not pin, answered regionally. The module docstring in
+`utils_vertex.py` dates that run. Five demos used to offer a region picker;
+every option it listed now fails, so the picker is gone and each of those
+pages states the endpoint instead.
+
 ### Key dependencies
 
 `requirements.txt` lists 15 direct dependencies. The demos depend most
@@ -140,14 +150,15 @@ to keep working.
 
    ```bash
    export GOOGLE_CLOUD_PROJECT="my-project"
-   export GOOGLE_CLOUD_LOCATION="us-central1"
+   export GOOGLE_CLOUD_LOCATION="global"
    export GOOGLE_GENAI_USE_VERTEXAI=true
    ```
 
-   Replace `my-project` with your Google Cloud project ID and `us-central1` with
-   the region that serves the Gemini models you want to use. The third variable
-   points the client at Vertex AI instead of the Gemini Developer API, which
-   takes an API key.
+   Replace `my-project` with your Google Cloud project ID. Leave the location
+   set to `global`. Vertex AI serves the model this repository pins only on
+   the global endpoint, and a regional value such as `us-central1` makes every
+   call answer with a not-found error. The third variable points the client at
+   Vertex AI instead of the Gemini Developer API, which takes an API key.
 
 ### Environment variables
 
@@ -159,7 +170,7 @@ the SDK rather than as a `None` inside a demo.
 | Variable | Set or read by | Purpose |
 | --- | --- | --- |
 | `GOOGLE_CLOUD_PROJECT` | `Dockerfile` and `cloudbuild.yaml` set it, and the `google-genai` client reads it | Google Cloud project that bills and serves the Gemini calls. |
-| `GOOGLE_CLOUD_LOCATION` | `Dockerfile` and `cloudbuild.yaml` set it, and the `google-genai` client reads it | Default Vertex AI region. A demo that offers a region picker overrides it per call. |
+| `GOOGLE_CLOUD_LOCATION` | `Dockerfile` and `cloudbuild.yaml` set it, and the `google-genai` client reads it | Vertex AI endpoint. Both files set it to `global`, the only endpoint that serves the pinned model. No demo overrides it. |
 | `GOOGLE_GENAI_USE_VERTEXAI` | `Dockerfile` and `cloudbuild.yaml` set it | Set it to `true` to route the client through Vertex AI and application default credentials. |
 | `DEMO_ASSETS_BUCKET` | `Dockerfile` and `setup.sh` set it | Names a Cloud Storage bucket for demo assets. No file in this repository reads the variable, so setting it changes nothing. |
 | `STREAMLIT_SERVER_ENABLE_STATIC_SERVING` | `Dockerfile` sets it | Flag that lets Streamlit serve files from a static directory. |
@@ -309,6 +320,14 @@ Override these substitution variables to change the target:
 | `_REPO_LOCATION` | `us-central1` | Artifact Registry location. |
 | `_SERVICE_NAME` | `gemini-re-demos` | Cloud Run service name and image name. |
 | `_SERVICE_REGION` | `us-central1` | Cloud Run region. |
+| `_VERTEX_LOCATION` | `global` | Vertex AI endpoint the deployed service calls. |
+
+`_SERVICE_REGION` and `_VERTEX_LOCATION` name two different things, and the
+pipeline used to pass one value for both. `_SERVICE_REGION` places the
+container; `_VERTEX_LOCATION` becomes `GOOGLE_CLOUD_LOCATION` on the service
+and picks the Vertex AI endpoint. A service that runs in `us-central1` still
+calls the global endpoint, because that is the only endpoint serving the
+pinned model. Move the service wherever you like and leave the endpoint alone.
 
 Cloud Build also requires `SHORT_SHA`, which it populates automatically for
 trigger-driven builds and which you pass yourself for manual builds.
@@ -321,9 +340,10 @@ update the build step in `cloudbuild.yaml` as well.
 
 `check_readme.py` checks this README against the repository: the sections it
 must contain, referenced paths, demo coverage, sidebar labels, model
-identifiers, dated claims, environment variables, packages, deployment
-commands, the license statement, and a set of mechanical style rules. It needs
-no arguments, no network access, and no Google Cloud credentials.
+identifiers, the Vertex AI endpoint, dated claims, environment variables,
+packages, deployment commands, the license statement, and a set of mechanical
+style rules. It needs no arguments, no network access, and no Google Cloud
+credentials.
 
 ```bash
 python3 check_readme.py
@@ -344,11 +364,13 @@ references.
   the page loads. Run `gcloud auth application-default login`, export
   `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, and
   `GOOGLE_GENAI_USE_VERTEXAI`, then restart the server.
-- **A model call returns a not-found error.** Vertex AI serves
-  `gemini-3.8-flash` for a short availability window, and it serves no model
-  in every region. Confirm the identifier against
-  [Gemini model identifiers](#gemini-model-identifiers), then pick a region
-  that carries it.
+- **A model call returns a not-found error.** Two different causes produce the
+  same error. Check the endpoint first: run `echo $GOOGLE_CLOUD_LOCATION` and
+  set it to `global` if it names a region, because a region serves no Gemini
+  3.x model and changing which region you pick cannot help. If the endpoint is
+  already `global`, the identifier is the suspect: Vertex AI serves
+  `gemini-3.8-flash` for a short availability window, so confirm it against
+  [Gemini model identifiers](#gemini-model-identifiers).
 - **A repository inspection run exhausts memory.** `apps/repo-inspection.py`
   loads a whole repository into the prompt. Analyze a smaller repository, or
   run the app on a machine with more memory.

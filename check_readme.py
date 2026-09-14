@@ -1556,6 +1556,104 @@ def check_cloudbuild(readme: Readme, results: Results) -> None:
     )
 
 
+def check_vertex_location(readme: Readme, results: Results) -> None:
+    """The Vertex endpoint must agree across the README, Dockerfile, and pipeline.
+
+    Vertex AI serves the pinned Gemini 3.x model only on the `global`
+    endpoint, so a regional value anywhere in this list breaks every demo with
+    a not-found error. The repository shipped exactly that defect: `Dockerfile`
+    and `cloudbuild.yaml` both said `us-central1`, and nothing compared them
+    against the endpoint the model needs.
+
+    The check reads the value out of each file rather than hardcoding one, so
+    a deliberate move stays a one-line edit in three places instead of a
+    tripwire. What it refuses is disagreement, and a demo that pins a region
+    of its own: the five region pickers this repository used to carry offered
+    only endpoints that answer 404.
+    """
+    failures: list[str] = []
+    found: dict[str, str] = {}
+
+    documented = re.search(
+        r"^\s*export GOOGLE_CLOUD_LOCATION=\"?([\w-]+)\"?", readme.code_text, re.MULTILINE
+    )
+    if documented:
+        found["the README export block"] = documented.group(1)
+    else:
+        failures.append(
+            "the README shows no `export GOOGLE_CLOUD_LOCATION` command, so the "
+            "endpoint it asks the reader to set cannot be checked"
+        )
+
+    dockerfile = REPO / "Dockerfile"
+    if dockerfile.exists():
+        env = re.search(
+            r"^\s*ENV\s+GOOGLE_CLOUD_LOCATION=(\S+)",
+            dockerfile.read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+        if env:
+            found["Dockerfile"] = env.group(1)
+
+    cloudbuild = REPO / "cloudbuild.yaml"
+    if cloudbuild.exists():
+        text = cloudbuild.read_text(encoding="utf-8")
+        subs = cloudbuild_substitutions()
+        deployed = re.search(r"GOOGLE_CLOUD_LOCATION=([^,'\"]+)", text)
+        if deployed:
+            value = deployed.group(1).strip()
+            reference = re.fullmatch(r"\$\{(_[A-Z0-9_]+)\}", value)
+            if reference:
+                name = reference.group(1)
+                if name not in subs:
+                    failures.append(
+                        f"cloudbuild.yaml sets GOOGLE_CLOUD_LOCATION from {name}, "
+                        f"which it does not define"
+                    )
+                else:
+                    found[f"cloudbuild.yaml ({name})"] = subs[name]
+                    # The Cloud Run region and the Vertex endpoint are two
+                    # different things. Passing one substitution for both means
+                    # moving the service also moves the model call.
+                    if name == "_SERVICE_REGION":
+                        failures.append(
+                            "cloudbuild.yaml sets GOOGLE_CLOUD_LOCATION from "
+                            "_SERVICE_REGION, which ties the Vertex AI endpoint to "
+                            "the Cloud Run region; give the endpoint its own "
+                            "substitution"
+                        )
+            else:
+                found["cloudbuild.yaml"] = value
+
+    values = set(found.values())
+    if len(values) > 1:
+        disagreement = ", ".join(f"{where} says {value}" for where, value in sorted(found.items()))
+        failures.append(f"the Vertex AI endpoint disagrees across the repository: {disagreement}")
+
+    # A region literal under apps/ is how the five pickers looked. Any one of
+    # them sends the demo to an endpoint that serves no Gemini 3.x model.
+    region_like = re.compile(
+        r"[\"']((?:us|europe|asia|southamerica|northamerica|australia|me)-[a-z]+\d)[\"']"
+    )
+    literals = 0
+    for path in sorted((REPO / "apps").rglob("*.py")):
+        if any(part in SKIP_DIRS for part in path.parts):
+            continue
+        for match in region_like.finditer(path.read_text(encoding="utf-8", errors="replace")):
+            literals += 1
+            failures.append(
+                f"{path.relative_to(REPO)} hardcodes the Vertex AI region "
+                f"{match.group(1)}, which serves no Gemini 3.x model"
+            )
+
+    results.add(
+        "vertex_location",
+        failures,
+        f"endpoint {'/'.join(sorted(values)) or '?'} from {len(found)} sources, "
+        f"{literals} region literals under apps/",
+    )
+
+
 def check_docker(readme: Readme, results: Results) -> None:
     failures: list[str] = []
     dockerfile = REPO / "Dockerfile"
@@ -2463,6 +2561,7 @@ def main() -> int:
     check_dates(readme, results)
     check_clone_url(readme, results)
     check_cloudbuild(readme, results)
+    check_vertex_location(readme, results)
     check_docker(readme, results)
     check_ports(readme, results)
     check_python_version(readme, results)

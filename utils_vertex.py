@@ -5,6 +5,21 @@ SDK reads `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, and
 `GOOGLE_GENAI_USE_VERTEXAI` on its own and authenticates with application
 default credentials, so nothing here passes a project, a region, or a key.
 
+Every call lands on the Vertex AI `global` endpoint, and no demo offers the
+reader a region to pick. A run against a live project on September 14, 2026
+sent one `generate_content` call per model and per location: `gemini-3.8-flash`
+answered on `global` and returned 404 NOT_FOUND on `us-central1`, `us-east5`,
+`southamerica-east1`, `us-east1`, `us-south1`, and `europe-southwest1`. Every
+other 3.x flash identifier behaved the same way. Only the previous model
+generation answered on a regional endpoint, and this repository pins none of
+those, so a region is not a setting a reader can usefully change.
+
+`GOOGLE_CLOUD_LOCATION` still carries the endpoint, and `Dockerfile`,
+`cloudbuild.yaml`, and the README all set it to `global`. The same run
+confirmed that the SDK falls back to `global` when the variable is unset, so a
+reader who forgets the export reaches the endpoint that works rather than a
+region that 404s.
+
 `get_client()` builds the client on first use rather than at import time. A
 client built at import turns a missing environment variable into an
 ImportError, which takes down every page of the Streamlit shell instead of the
@@ -25,6 +40,14 @@ MODEL_ID = "gemini-3.8-flash"
 
 # The embedding model that replaces the retired textembedding-gecko family.
 EMBEDDING_MODEL_ID = "gemini-embedding-001"
+
+# The five demos that used to offer a region picker show this line where the
+# picker stood. It lives here, not in each demo, so the five cannot drift.
+LOCATION_NOTE = (
+    "Vertex AI serves Gemini 3.x models only on the global endpoint, so this "
+    "demo no longer offers a region picker. Set GOOGLE_CLOUD_LOCATION to move "
+    "the endpoint."
+)
 
 # Refuse a prompt this script cannot afford to send. count_tokens() answers
 # before the request goes out, so an oversized prompt costs one cheap call
@@ -58,25 +81,15 @@ SAFETY_SETTINGS = [
 
 
 @functools.cache
-def _client(location: str | None) -> genai.Client:
-    if location:
-        return genai.Client(location=location)
-    return genai.Client()
+def get_client() -> genai.Client:
+    """Return the one shared client, built on the first call.
 
-
-def get_client(location: str | None = None) -> genai.Client:
-    """Return a cached client, one per location.
-
-    Pass `location` only where the reader picks a region in the interface.
-    Everywhere else, leave it unset and let the SDK read
-    `GOOGLE_CLOUD_LOCATION`.
-
-    The cache sits behind this function rather than on it: `functools.cache`
-    keys on the call signature, so caching `get_client` itself would give
-    `get_client()` and `get_client(None)` separate entries and build the same
-    client twice.
+    The client takes no location. The SDK reads `GOOGLE_CLOUD_LOCATION`, and
+    the endpoint that serves this repository's model is `global` either way:
+    the deployment files set the variable to `global`, and the SDK defaults to
+    `global` when nothing sets it.
     """
-    return _client(location or None)
+    return genai.Client()
 
 
 def generation_config(
@@ -95,9 +108,9 @@ def generation_config(
     )
 
 
-def count_tokens(contents, model: str = MODEL_ID, location: str | None = None) -> int:
+def count_tokens(contents, model: str = MODEL_ID) -> int:
     """Return the token count Vertex AI reports for a prompt."""
-    response = get_client(location).models.count_tokens(model=model, contents=contents)
+    response = get_client().models.count_tokens(model=model, contents=contents)
     return response.total_tokens or 0
 
 
@@ -123,18 +136,17 @@ def usage_tokens(response) -> dict[str, int]:
 def sendPrompt(  # the name every demo already calls
     input,
     model: str = MODEL_ID,
-    location: str | None = None,
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS,
 ):
     """Send one prompt to Gemini and return the text of the answer."""
-    total_tokens = count_tokens(input, model=model, location=location)
+    total_tokens = count_tokens(input, model=model)
     if total_tokens > MAX_INPUT_TOKENS:
         raise ValueError(
             f"The prompt holds {total_tokens} tokens, above the "
             f"{MAX_INPUT_TOKENS} this helper sends."
         )
 
-    response = get_client(location).models.generate_content(
+    response = get_client().models.generate_content(
         model=model,
         contents=input,
         config=generation_config(max_output_tokens=max_output_tokens),
